@@ -1,0 +1,20 @@
+{
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "routes": [
+    {
+      "src": "/[^.]+",
+      "dest": "/",
+      "status": 200
+    }
+  ],
+  "github": {
+    "silent": true
+  },
+  "env": {
+    "VITE_GOOGLE_API_KEY": "@vite_google_api_key",
+    "VITE_EXPERT_SHEET_ID": "@vite_expert_sheet_id",
+    "VITE_REQUEST_SHEET_ID": "@vite_request_sheet_id"
+  }
+} 
