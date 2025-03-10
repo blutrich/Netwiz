@@ -6,6 +6,7 @@ import { RequestsPage } from "./pages/requests";
 import { AnalyticsPage } from "./pages/analytics";
 import { SettingsPage } from "./pages/settings";
 import { LandingPage } from "./pages/landing";
+import { ToastContainer } from "./components/ui/use-toast";
 
 function App() {
   return (
@@ -29,6 +30,9 @@ function App() {
         <Route path="/analytics" element={<Navigate to="/dashboard/analytics" replace />} />
         <Route path="/settings" element={<Navigate to="/dashboard/settings" replace />} />
       </Routes>
+      
+      {/* Toast notifications */}
+      <ToastContainer />
     </BrowserRouter>
   );
 }
