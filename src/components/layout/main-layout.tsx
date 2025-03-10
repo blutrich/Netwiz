@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { cn } from "../../lib/utils";
 import { Logo } from "../ui/logo";
 import { FullLogo } from "../ui/full-logo";
+import { UserRoleBadge } from "../ui/user-role-badge";
+import { getCurrentUser, hasPermission } from "../../lib/services/user-management";
 
 interface MainLayoutProps {
   className?: string;
@@ -11,6 +13,7 @@ interface MainLayoutProps {
 export function MainLayout({ className }: MainLayoutProps) {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(getCurrentUser());
 
   // Get the current page title based on the route
   const getPageTitle = () => {
@@ -20,8 +23,14 @@ export function MainLayout({ className }: MainLayoutProps) {
     if (path.includes('/dashboard/requests')) return 'Requests';
     if (path.includes('/dashboard/analytics')) return 'Analytics';
     if (path.includes('/dashboard/settings')) return 'Settings';
+    if (path.includes('/dashboard/users')) return 'User Management';
     return 'Admin Dashboard';
   };
+
+  // Refresh current user when location changes
+  useEffect(() => {
+    setCurrentUser(getCurrentUser());
+  }, [location]);
 
   return (
     <div className="min-h-screen flex">
@@ -47,16 +56,31 @@ export function MainLayout({ className }: MainLayoutProps) {
               label="Requests" 
               active={location.pathname.includes('/dashboard/requests')} 
             />
-            <NavItem 
-              to="/dashboard/analytics" 
-              label="Analytics" 
-              active={location.pathname.includes('/dashboard/analytics')} 
-            />
-            <NavItem 
-              to="/dashboard/settings" 
-              label="Settings" 
-              active={location.pathname.includes('/dashboard/settings')} 
-            />
+            
+            {/* Manager+ only */}
+            {hasPermission('manager') && (
+              <NavItem 
+                to="/dashboard/analytics" 
+                label="Analytics" 
+                active={location.pathname.includes('/dashboard/analytics')} 
+              />
+            )}
+            
+            {/* Admin only */}
+            {hasPermission('admin') && (
+              <>
+                <NavItem 
+                  to="/dashboard/settings" 
+                  label="Settings" 
+                  active={location.pathname.includes('/dashboard/settings')} 
+                />
+                <NavItem 
+                  to="/dashboard/users" 
+                  label="User Management" 
+                  active={location.pathname.includes('/dashboard/users')} 
+                />
+              </>
+            )}
           </ul>
         </nav>
       </aside>
@@ -89,9 +113,20 @@ export function MainLayout({ className }: MainLayoutProps) {
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
               </svg>
             </button>
-            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
-              A
-            </div>
+            
+            {currentUser && (
+              <div className="flex items-center gap-2">
+                <div className="hidden md:block text-right">
+                  <div className="text-sm font-medium">{currentUser.name}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-1">
+                    <UserRoleBadge role={currentUser.role} />
+                  </div>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
+                  {currentUser.name.charAt(0).toUpperCase()}
+                </div>
+              </div>
+            )}
           </div>
         </header>
 
@@ -115,16 +150,31 @@ export function MainLayout({ className }: MainLayoutProps) {
                   label="Requests" 
                   active={location.pathname.includes('/dashboard/requests')} 
                 />
-                <NavItem 
-                  to="/dashboard/analytics" 
-                  label="Analytics" 
-                  active={location.pathname.includes('/dashboard/analytics')} 
-                />
-                <NavItem 
-                  to="/dashboard/settings" 
-                  label="Settings" 
-                  active={location.pathname.includes('/dashboard/settings')} 
-                />
+                
+                {/* Manager+ only */}
+                {hasPermission('manager') && (
+                  <NavItem 
+                    to="/dashboard/analytics" 
+                    label="Analytics" 
+                    active={location.pathname.includes('/dashboard/analytics')} 
+                  />
+                )}
+                
+                {/* Admin only */}
+                {hasPermission('admin') && (
+                  <>
+                    <NavItem 
+                      to="/dashboard/settings" 
+                      label="Settings" 
+                      active={location.pathname.includes('/dashboard/settings')} 
+                    />
+                    <NavItem 
+                      to="/dashboard/users" 
+                      label="User Management" 
+                      active={location.pathname.includes('/dashboard/users')} 
+                    />
+                  </>
+                )}
               </ul>
             </nav>
           </div>

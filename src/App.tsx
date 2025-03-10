@@ -6,22 +6,55 @@ import { RequestsPage } from "./pages/requests";
 import { AnalyticsPage } from "./pages/analytics";
 import { SettingsPage } from "./pages/settings";
 import { LandingPage } from "./pages/landing";
+import { UsersPage } from "./pages/users";
+import { UnauthorizedPage } from "./pages/unauthorized";
 import { ToastContainer } from "./components/ui/use-toast";
+import { ProtectedRoute } from "./components/auth/protected-route";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Landing page */}
+        {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         
         {/* Dashboard and other app pages */}
         <Route path="/dashboard" element={<MainLayout />}>
           <Route index element={<DashboardPage />} />
-          <Route path="community" element={<CommunityPage />} />
-          <Route path="requests" element={<RequestsPage />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          
+          {/* Viewer access */}
+          <Route path="community" element={
+            <ProtectedRoute requiredRole="viewer">
+              <CommunityPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="requests" element={
+            <ProtectedRoute requiredRole="viewer">
+              <RequestsPage />
+            </ProtectedRoute>
+          } />
+          
+          {/* Manager access */}
+          <Route path="analytics" element={
+            <ProtectedRoute requiredRole="manager">
+              <AnalyticsPage />
+            </ProtectedRoute>
+          } />
+          
+          {/* Admin access */}
+          <Route path="settings" element={
+            <ProtectedRoute requiredRole="admin">
+              <SettingsPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="users" element={
+            <ProtectedRoute requiredRole="admin">
+              <UsersPage />
+            </ProtectedRoute>
+          } />
         </Route>
         
         {/* Redirect legacy routes */}
@@ -29,6 +62,7 @@ function App() {
         <Route path="/requests" element={<Navigate to="/dashboard/requests" replace />} />
         <Route path="/analytics" element={<Navigate to="/dashboard/analytics" replace />} />
         <Route path="/settings" element={<Navigate to="/dashboard/settings" replace />} />
+        <Route path="/users" element={<Navigate to="/dashboard/users" replace />} />
       </Routes>
       
       {/* Toast notifications */}
