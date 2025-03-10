@@ -42,12 +42,18 @@ export function UsersPage() {
   // Handle role change
   const handleRoleChange = async (userId: string, newRole: UserRole) => {
     try {
+      setLoading(true);
+      toast({
+        title: "Updating Role",
+        description: "Updating user role in Google Sheets...",
+      });
+
       const updatedUser = await updateUserRole(userId, newRole);
       if (updatedUser) {
         setUsers(users.map(user => user.id === userId ? updatedUser : user));
         toast({
           title: "Role Updated",
-          description: `User role has been updated to ${newRole}.`,
+          description: `User role has been updated to ${newRole} in Google Sheets.`,
           variant: "success"
         });
       }
@@ -55,21 +61,29 @@ export function UsersPage() {
       console.error("Error updating role:", error);
       toast({
         title: "Error",
-        description: "Failed to update user role. Please try again.",
+        description: "Failed to update user role in Google Sheets. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   // Handle toggle active status
   const handleToggleActive = async (userId: string) => {
     try {
+      setLoading(true);
+      toast({
+        title: "Updating Status",
+        description: "Updating user status in Google Sheets...",
+      });
+
       const updatedUser = await toggleUserActive(userId);
       if (updatedUser) {
         setUsers(users.map(user => user.id === userId ? updatedUser : user));
         toast({
           title: "Status Updated",
-          description: `User has been ${updatedUser.isActive ? 'activated' : 'deactivated'}.`,
+          description: `User has been ${updatedUser.isActive ? 'activated' : 'deactivated'} in Google Sheets.`,
           variant: "success"
         });
       }
@@ -77,9 +91,11 @@ export function UsersPage() {
       console.error("Error toggling status:", error);
       toast({
         title: "Error",
-        description: "Failed to update user status. Please try again.",
+        description: "Failed to update user status in Google Sheets. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,6 +111,12 @@ export function UsersPage() {
         return;
       }
 
+      setLoading(true);
+      toast({
+        title: "Adding User",
+        description: "Adding user to Google Sheets...",
+      });
+
       const addedUser = await addUser(newUser);
       setUsers([...users, addedUser]);
       setNewUser({
@@ -106,16 +128,18 @@ export function UsersPage() {
       setShowAddUser(false);
       toast({
         title: "User Added",
-        description: "New user has been added successfully.",
+        description: "New user has been added successfully to Google Sheets.",
         variant: "success"
       });
     } catch (error) {
       console.error("Error adding user:", error);
       toast({
         title: "Error",
-        description: "Failed to add user. Please try again.",
+        description: "Failed to add user to Google Sheets. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -379,20 +403,28 @@ export function UsersPage() {
               </table>
             </div>
             
-            <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
-              <h3 className="text-sm font-medium text-yellow-800">Note</h3>
-              <p className="text-sm text-yellow-700 mt-1">
-                Changes made in this interface will be reflected in the application immediately, but they will not be automatically synced back to the Google Sheet. 
-                To update the Google Sheet, you'll need to manually edit it.
+            <div className="bg-green-50 p-4 rounded-md border border-green-200">
+              <h3 className="text-sm font-medium text-green-800">Two-Way Sync Enabled</h3>
+              <p className="text-sm text-green-700 mt-1">
+                Changes made in this interface will be automatically synced back to the Google Sheet. 
+                This includes adding new users, changing roles, and toggling active status.
               </p>
             </div>
 
             <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
               <h3 className="text-sm font-medium text-blue-800">How to Add Users</h3>
               <p className="text-sm text-blue-700 mt-1">
-                You can add users directly in your Google Sheet by adding a new row with the user's information. 
-                Make sure to include at least a name, email, role, and status. The changes will be reflected in this interface 
-                when you refresh the page or click the "Refresh" button.
+                You can add users either directly in your Google Sheet or through this interface using the "Add User" button. 
+                Both methods will keep the data in sync. When adding users through this interface, they will be automatically 
+                added to your Google Sheet.
+              </p>
+            </div>
+            
+            <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
+              <h3 className="text-sm font-medium text-yellow-800">Authentication Note</h3>
+              <p className="text-sm text-yellow-700 mt-1">
+                For simplicity, the system uses email addresses as both the identifier and password for login. 
+                Users will need to enter their email address as the password when logging in.
               </p>
             </div>
           </div>

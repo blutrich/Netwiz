@@ -196,7 +196,7 @@ export const getUserById = async (id: string): Promise<User | null> => {
   return users.find(user => user.id === id) || null;
 };
 
-// Update user role
+// Update user role and update in Google Sheets
 export const updateUserRole = async (userId: string, newRole: UserRole): Promise<User | null> => {
   try {
     const users = await getUsers();
@@ -210,8 +210,12 @@ export const updateUserRole = async (userId: string, newRole: UserRole): Promise
     // Update user role
     users[userIndex].role = newRole;
     
-    // In a real application, you would update the Google Sheet here
-    // For now, we'll just return the updated user
+    // Update in Google Sheets
+    // Since we're using row index as ID, we can calculate the row number
+    const rowNumber = parseInt(userId) + 1; // +1 because we're 0-indexed and sheets are 1-indexed
+    
+    // Update the role cell (column C)
+    await updateSheetCell(SPREADSHEET_ID, `${ADMIN_TAB_NAME}!C${rowNumber + 1}`, newRole);
     
     return users[userIndex];
   } catch (error) {
@@ -220,7 +224,7 @@ export const updateUserRole = async (userId: string, newRole: UserRole): Promise
   }
 };
 
-// Toggle user active status
+// Toggle user active status and update in Google Sheets
 export const toggleUserActive = async (userId: string): Promise<User | null> => {
   try {
     const users = await getUsers();
@@ -234,8 +238,13 @@ export const toggleUserActive = async (userId: string): Promise<User | null> => 
     // Toggle active status
     users[userIndex].isActive = !users[userIndex].isActive;
     
-    // In a real application, you would update the Google Sheet here
-    // For now, we'll just return the updated user
+    // Update in Google Sheets
+    // Since we're using row index as ID, we can calculate the row number
+    const rowNumber = parseInt(userId) + 1; // +1 because we're 0-indexed and sheets are 1-indexed
+    
+    // Update the status cell (column D)
+    const newStatus = users[userIndex].isActive ? "Active" : "Inactive";
+    await updateSheetCell(SPREADSHEET_ID, `${ADMIN_TAB_NAME}!D${rowNumber + 1}`, newStatus);
     
     return users[userIndex];
   } catch (error) {
@@ -244,7 +253,7 @@ export const toggleUserActive = async (userId: string): Promise<User | null> => 
   }
 };
 
-// Add new user
+// Add new user and write to Google Sheets
 export const addUser = async (user: Omit<User, 'id' | 'createdAt'>): Promise<User> => {
   try {
     // Generate ID and creation date
@@ -254,8 +263,18 @@ export const addUser = async (user: Omit<User, 'id' | 'createdAt'>): Promise<Use
       createdAt: new Date().toISOString()
     };
     
-    // In a real application, you would add the user to the Google Sheet here
-    // For now, we'll just return the new user
+    // Prepare data for Google Sheets
+    // Format: [Name, Email, Role, Status, Last Login]
+    const rowData = [
+      newUser.name,
+      newUser.email,
+      newUser.role,
+      newUser.isActive ? "Active" : "Inactive",
+      newUser.lastLogin || ""
+    ];
+    
+    // Append to Google Sheets
+    await appendToSheet(SPREADSHEET_ID, ADMIN_TAB_NAME, rowData);
     
     return newUser;
   } catch (error) {
@@ -263,6 +282,71 @@ export const addUser = async (user: Omit<User, 'id' | 'createdAt'>): Promise<Use
     throw error;
   }
 };
+
+// Append a row to Google Sheets
+async function appendToSheet(spreadsheetId: string, sheetName: string, rowData: any[]): Promise<boolean> {
+  try {
+    const range = `${sheetName}!A:F`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+    
+    console.log(`Appending data to spreadsheet: ${spreadsheetId}, range: ${range}`);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        values: [rowData]
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error Response: ${errorText}`);
+      throw new Error(`Google Sheets API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('Append Response:', data);
+    return true;
+  } catch (error) {
+    console.error('Error appending to sheet:', error);
+    throw error;
+  }
+}
+
+// Update a single cell in Google Sheets
+async function updateSheetCell(spreadsheetId: string, range: string, value: string): Promise<boolean> {
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+    
+    console.log(`Updating cell in spreadsheet: ${spreadsheetId}, range: ${range}, value: ${value}`);
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        values: [[value]]
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error Response: ${errorText}`);
+      throw new Error(`Google Sheets API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('Update Response:', data);
+    return true;
+  } catch (error) {
+    console.error('Error updating sheet cell:', error);
+    throw error;
+  }
+}
 
 // Mock users list - used as fallback when Google Sheets is not available
 const mockUsers: User[] = [
