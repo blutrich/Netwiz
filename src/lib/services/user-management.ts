@@ -16,7 +16,7 @@ let currentUser: User | null = null;
 // Google Sheets configuration
 const SPREADSHEET_ID = import.meta.env.VITE_EXPERT_SHEET_ID || "";
 const ADMIN_TAB_NAME = "admin"; // The name of your admin tab
-const ADMIN_RANGE = `${ADMIN_TAB_NAME}!A2:G100`; // Adjust range as needed
+const ADMIN_RANGE = `${ADMIN_TAB_NAME}!A2:F100`; // Adjust range as needed - matches your columns
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "";
 
 // Initialize with admin user if none exists
@@ -68,7 +68,7 @@ export const hasPermission = (requiredRole: UserRole): boolean => {
   return false;
 };
 
-// Fetch data from Google Sheets API (copied from google-sheets.ts)
+// Fetch data from Google Sheets API
 async function fetchSheetData(spreadsheetId: string, range: string): Promise<any[][]> {
   try {
     console.log(`Fetching data from spreadsheet: ${spreadsheetId}, range: ${range}`);
@@ -92,16 +92,33 @@ async function fetchSheetData(spreadsheetId: string, range: string): Promise<any
   }
 }
 
-// Convert sheet row to User object
-const rowToUser = (row: any[]): User => {
+// Convert sheet row to User object - updated to match your column structure
+// A: name, B: Email, C: Role, D: Status, E: Last Login, F: Actions
+const rowToUser = (row: any[], index: number): User => {
+  // Generate a unique ID if none exists
+  const id = String(index + 1);
+  
+  // Extract values from the row
+  const name = row[0] || "";
+  const email = row[1] || "";
+  const role = (row[2]?.toLowerCase() as UserRole) || "viewer";
+  const status = row[3] || "";
+  const lastLogin = row[4] || undefined;
+  
+  // Determine if user is active based on Status column
+  const isActive = status.toLowerCase() === "active" || status.toLowerCase() === "true";
+  
+  // Use current date as creation date if none exists
+  const createdAt = new Date().toISOString();
+  
   return {
-    id: row[0] || String(Math.random()),
-    email: row[1] || "",
-    name: row[2] || "",
-    role: (row[3] as UserRole) || "viewer",
-    createdAt: row[4] || new Date().toISOString(),
-    lastLogin: row[5] || undefined,
-    isActive: row[6] === "TRUE" || row[6] === true || row[6] === "true"
+    id,
+    name,
+    email,
+    role,
+    createdAt,
+    lastLogin,
+    isActive
   };
 };
 
@@ -113,7 +130,7 @@ export const getUsers = async (): Promise<User[]> => {
     
     if (data && data.length > 0) {
       // Convert sheet data to User objects
-      return data.map(rowToUser).filter(user => user.email); // Filter out empty rows
+      return data.map((row, index) => rowToUser(row, index)).filter(user => user.name || user.email); // Filter out empty rows
     }
     
     // Fall back to mock data if sheet is empty or not accessible
