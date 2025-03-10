@@ -1,0 +1,38 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# JS/TS files
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+
+# JSON files
+*.json text
+
+# CSS/SCSS files
+*.css text
+*.scss text
+
+# HTML files
+*.html text
+
+# SVG files
+*.svg text
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# Specific files
+*.sh text eol=lf
+package-lock.json binary
+yarn.lock binary
+pnpm-lock.yaml binary 

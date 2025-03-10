@@ -18,14 +18,16 @@ NetWizBot is a web application that helps WhatsApp communities connect members a
 - **UI Components**: shadcn/ui, Tailwind CSS
 - **Data Management**: Google Sheets API integration
 - **Authentication**: Custom authentication system
+- **Deployment**: Vercel
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (v16 or higher)
 - npm or yarn
 - Google Sheets API key
+- Vercel CLI (for deployment)
 
 ### Installation
 
@@ -44,6 +46,7 @@ NetWizBot is a web application that helps WhatsApp communities connect members a
    ```
    VITE_EXPERT_SHEET_ID=your_google_sheet_id
    VITE_GOOGLE_API_KEY=your_google_api_key
+   VITE_REQUEST_SHEET_ID=your_request_sheet_id
    ```
 
 4. Start the development server:
@@ -73,6 +76,81 @@ NetWizBot is a web application that helps WhatsApp communities connect members a
 
 - Admins can add, edit, and deactivate users
 - Changes to users in the application need to be manually synced to Google Sheets due to API limitations
+
+## Deployment
+
+### Vercel Deployment (Recommended)
+
+1. Install Vercel CLI:
+   ```
+   npm install -g vercel
+   ```
+
+2. Login to Vercel:
+   ```
+   vercel login
+   ```
+
+3. Deploy using the deployment script:
+   ```
+   chmod +x deploy.sh
+   ./deploy.sh
+   ```
+
+The deployment script performs the following actions:
+- Validates environment variables
+- Checks for uncommitted changes in Git
+- Builds the project with production settings
+- Deploys to Vercel with the correct environment variables
+
+### Alternative Deployment Methods
+
+#### Static Deployment
+For testing purposes, you can deploy just the static assets:
+```
+chmod +x deploy-static.sh
+./deploy-static.sh
+```
+
+## Development Workflow
+
+### Git Best Practices
+
+1. **Branch Strategy**:
+   - `main`: Production-ready code
+   - `develop`: Integration branch for features
+   - `feature/feature-name`: For new features
+   - `bugfix/bug-name`: For bug fixes
+
+2. **Commit Message Guidelines**:
+   - Use clear, descriptive commit messages
+   - Format: `[Type]: Brief description`
+   - Types: feat, fix, docs, style, refactor, test, chore
+
+3. **Pull Request Process**:
+   - Create PRs from feature branches to develop
+   - Request code reviews before merging
+   - Squash commits when merging to keep history clean
+
+### Environment Variables
+
+- Never commit environment variables to Git
+- Use `.env.example` to document required variables
+- Set environment variables in deployment platforms
+
+## Troubleshooting
+
+### Common Issues
+
+1. **App Not Loading After Deployment**:
+   - Check if environment variables are set correctly in Vercel
+   - Ensure Google API key has proper permissions
+   - Verify that the Google Sheets IDs are correct
+
+2. **Google Sheets Connection Issues**:
+   - Make sure the Google Sheets API is enabled in your Google Cloud Console
+   - Check that your API key has access to the Google Sheets API
+   - Verify CORS settings if accessing from browser
 
 ## License
 
