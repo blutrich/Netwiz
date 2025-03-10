@@ -14,7 +14,6 @@
   },
   "env": {
     "VITE_GOOGLE_API_KEY": "@vite_google_api_key",
-    "VITE_EXPERT_SHEET_ID": "@vite_expert_sheet_id",
-    "VITE_REQUEST_SHEET_ID": "@vite_request_sheet_id"
+    "VITE_EXPERT_SHEET_ID": "@vite_expert_sheet_id"
   }
 } 

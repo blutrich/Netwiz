@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "../../lib/utils";
-import { Logo } from "../ui/logo";
 import { FullLogo } from "../ui/full-logo";
 import { UserRoleBadge } from "../ui/user-role-badge";
 import { getCurrentUser, hasPermission, logoutUser } from "../../lib/services/user-management";

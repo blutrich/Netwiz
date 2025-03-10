@@ -434,44 +434,4 @@ async function updateSheetCell(spreadsheetId: string, range: string, value: stri
     console.error('Error updating sheet cell:', error);
     throw error;
   }
-}
-
-// Mock users list - used as fallback when Google Sheets is not available
-const mockUsers: User[] = [
-  {
-    id: '1',
-    email: 'admin@example.com',
-    name: 'Admin User',
-    role: 'admin',
-    createdAt: '2023-01-01T00:00:00Z',
-    lastLogin: '2023-06-15T14:30:00Z',
-    isActive: true
-  },
-  {
-    id: '2',
-    email: 'manager@example.com',
-    name: 'Manager User',
-    role: 'manager',
-    createdAt: '2023-02-15T00:00:00Z',
-    lastLogin: '2023-06-14T09:15:00Z',
-    isActive: true
-  },
-  {
-    id: '3',
-    email: 'viewer@example.com',
-    name: 'Viewer User',
-    role: 'viewer',
-    createdAt: '2023-03-20T00:00:00Z',
-    lastLogin: '2023-06-10T16:45:00Z',
-    isActive: true
-  },
-  {
-    id: '4',
-    email: 'inactive@example.com',
-    name: 'Inactive User',
-    role: 'viewer',
-    createdAt: '2023-04-05T00:00:00Z',
-    lastLogin: '2023-05-01T11:20:00Z',
-    isActive: false
-  }
-]; 
+} 
