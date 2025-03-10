@@ -1,6 +1,5 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
 
 export function SettingsPage() {
   return (
@@ -86,7 +85,7 @@ export function SettingsPage() {
                   id="openai-key"
                   type="password"
                   className="w-full p-2 mt-1 border rounded-md"
-                  placeholder="Your teOpenAI API Key"
+                  placeholder="Your OpenAI API Key"
                   defaultValue="••••••••••••••••"
                 />
               </div>

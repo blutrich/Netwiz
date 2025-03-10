@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { useExperts, useRequests } from "../hooks/use-sheets-data";
-import { Expert, Request } from "../lib/services/google-sheets";
 import {
   BarChart,
   Bar,
@@ -355,7 +354,7 @@ export function AnalyticsPage() {
                       dataKey="value"
                       onMouseEnter={(_, index) => setActivePieIndex(index)}
                     >
-                      {pieData.map((entry, index) => (
+                      {pieData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>

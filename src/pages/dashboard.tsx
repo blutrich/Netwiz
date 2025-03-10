@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { useExperts, useRequests } from "../hooks/use-sheets-data";
-import { Expert, Request } from "../lib/services/google-sheets";
 
 export function DashboardPage() {
   const { experts, loading: expertsLoading } = useExperts();
-  const { requests, loading: requestsLoading, stats: requestStats } = useRequests();
+  const { requests, loading: requestsLoading } = useRequests();
   const [categories, setCategories] = useState<{ name: string; count: number; percentage: number }[]>([]);
   
   // Calculate dashboard stats
