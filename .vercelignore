@@ -1,4 +1,4 @@
-# Ignore TypeScript errors
-*.ts
-*.tsx
-tsconfig.json 
+# Ignore everything except dist folder
+*
+!dist/
+!vercel.json 
