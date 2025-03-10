@@ -27,6 +27,16 @@ export function LoginPage() {
     
     try {
       setLoading(true);
+      console.log(`Attempting to login with email: ${email}`);
+      
+      // For blutrich@gmail.com, show a special message
+      if (email.toLowerCase().trim() === "blutrich@gmail.com") {
+        toast({
+          title: "Special User",
+          description: "Attempting to log in with blutrich@gmail.com...",
+        });
+      }
+      
       const user = await authenticateUser(email, password);
       
       if (user) {
@@ -37,17 +47,28 @@ export function LoginPage() {
         });
         navigate("/dashboard");
       } else {
-        toast({
-          title: "Login Failed",
-          description: "Invalid email or password. Please try again.",
-          variant: "destructive"
-        });
+        console.error("Authentication failed - no user returned");
+        
+        // Special message for blutrich@gmail.com
+        if (email.toLowerCase().trim() === "blutrich@gmail.com") {
+          toast({
+            title: "Login Failed",
+            description: "Could not find blutrich@gmail.com in the Google Sheet. Please check that this email exists in your admin tab.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Login Failed",
+            description: "Invalid email or password. Please try again.",
+            variant: "destructive"
+          });
+        }
       }
     } catch (error) {
       console.error("Login error:", error);
       toast({
         title: "Login Error",
-        description: "An error occurred during login. Please try again.",
+        description: "An error occurred during login. Please check the console for details.",
         variant: "destructive"
       });
     } finally {

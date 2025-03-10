@@ -122,48 +122,112 @@ const rowToUser = (row: any[], index: number): User => {
 // Authenticate user against Google Sheets data
 export const authenticateUser = async (email: string, password: string): Promise<User | null> => {
   try {
-    // For simplicity, we're using email as the primary key and password as a simple string match
-    // In a real application, you would use proper password hashing
+    console.log(`Attempting to authenticate user with email: ${email}`);
     
-    // Fetch all users from Google Sheets
-    const data = await fetchSheetData(SPREADSHEET_ID, ADMIN_RANGE);
-    
-    if (!data || data.length === 0) {
-      console.warn("No user data found in Google Sheets for authentication");
-      return null;
+    // Special case for blutrich@gmail.com - hardcoded admin access
+    if (email.toLowerCase().trim() === "blutrich@gmail.com") {
+      console.log("Using hardcoded admin access for blutrich@gmail.com");
+      
+      const adminUser: User = {
+        id: "admin-1",
+        email: "blutrich@gmail.com",
+        name: "Admin User",
+        role: "admin",
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+        isActive: true
+      };
+      
+      // Set as current user
+      setCurrentUser(adminUser);
+      
+      console.log("Admin user authenticated successfully:", adminUser);
+      return adminUser;
     }
     
-    // Find user with matching email
-    const userIndex = data.findIndex(row => 
-      row[1]?.toLowerCase() === email.toLowerCase() && row.length >= 2
-    );
-    
-    if (userIndex === -1) {
-      console.warn(`No user found with email: ${email}`);
+    // For all other users, try Google Sheets
+    try {
+      // Fetch all users from Google Sheets
+      const data = await fetchSheetData(SPREADSHEET_ID, ADMIN_RANGE);
+      
+      if (!data || data.length === 0) {
+        console.warn("No user data found in Google Sheets for authentication");
+        return null;
+      }
+      
+      console.log(`Found ${data.length} rows in the admin sheet`);
+      
+      // Debug: Log all emails in the sheet to help diagnose issues
+      console.log("Emails in sheet:", data.map(row => row[1] || "empty").join(", "));
+      
+      // Find user with matching email - case insensitive comparison
+      const userIndex = data.findIndex(row => {
+        if (!row[1]) return false; // Skip rows with no email
+        
+        const rowEmail = String(row[1]).toLowerCase().trim();
+        const searchEmail = email.toLowerCase().trim();
+        
+        console.log(`Comparing: "${rowEmail}" with "${searchEmail}"`);
+        return rowEmail === searchEmail;
+      });
+      
+      if (userIndex === -1) {
+        console.warn(`No user found with email: ${email}`);
+        return null;
+      }
+      
+      console.log(`Found user at index ${userIndex}: ${data[userIndex]}`);
+      
+      // In a real application, you would use a secure password field in your sheet
+      // For this demo, we'll use a simple approach where the password is the email
+      // This simulates authentication without requiring actual passwords in the sheet
+      const userEmail = String(data[userIndex][1]).trim();
+      
+      // Check if password matches (in this case, password = email)
+      if (password === userEmail) {
+        console.log("Password accepted");
+        
+        // Convert row to user object
+        const user = rowToUser(data[userIndex], userIndex);
+        
+        // Update last login time
+        user.lastLogin = new Date().toISOString();
+        
+        // Set as current user
+        setCurrentUser(user);
+        
+        console.log("User authenticated successfully:", user);
+        return user;
+      } else {
+        console.warn("Password does not match");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error authenticating with Google Sheets:", error);
+      
+      // If Google Sheets authentication fails for blutrich@gmail.com, use hardcoded admin
+      if (email.toLowerCase().trim() === "blutrich@gmail.com") {
+        console.log("Falling back to hardcoded admin for blutrich@gmail.com after Google Sheets error");
+        
+        const adminUser: User = {
+          id: "admin-1",
+          email: "blutrich@gmail.com",
+          name: "Admin User",
+          role: "admin",
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+          isActive: true
+        };
+        
+        // Set as current user
+        setCurrentUser(adminUser);
+        
+        console.log("Admin user authenticated successfully:", adminUser);
+        return adminUser;
+      }
+      
       return null;
     }
-    
-    // In a real application, you would use a secure password field in your sheet
-    // For this demo, we'll use a simple approach where the password is the email
-    // This simulates authentication without requiring actual passwords in the sheet
-    const userEmail = data[userIndex][1];
-    
-    // Check if password matches (in this case, password = email)
-    if (password !== userEmail) {
-      console.warn("Password does not match");
-      return null;
-    }
-    
-    // Convert row to user object
-    const user = rowToUser(data[userIndex], userIndex);
-    
-    // Update last login time
-    user.lastLogin = new Date().toISOString();
-    
-    // Set as current user
-    setCurrentUser(user);
-    
-    return user;
   } catch (error) {
     console.error("Authentication error:", error);
     return null;
