@@ -6,6 +6,7 @@ import { RequestsPage } from "./pages/requests";
 import { AnalyticsPage } from "./pages/analytics";
 import { SettingsPage } from "./pages/settings";
 import { LandingPage } from "./pages/landing";
+import { LoginPage } from "./pages/login";
 import { UsersPage } from "./pages/users";
 import { UnauthorizedPage } from "./pages/unauthorized";
 import { ToastContainer } from "./components/ui/use-toast";
@@ -17,6 +18,7 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         
         {/* Dashboard and other app pages */}

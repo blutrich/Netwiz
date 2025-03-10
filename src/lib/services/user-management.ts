@@ -8,6 +8,7 @@ export interface User {
   createdAt: string;
   lastLogin?: string;
   isActive: boolean;
+  password?: string; // Added for authentication
 }
 
 // Current user stored in memory
@@ -24,17 +25,6 @@ const initializeCurrentUser = () => {
   const savedUser = localStorage.getItem('currentUser');
   if (savedUser) {
     currentUser = JSON.parse(savedUser);
-  } else {
-    // Default admin user
-    currentUser = {
-      id: '1',
-      email: 'admin@example.com',
-      name: 'Admin User',
-      role: 'admin',
-      createdAt: new Date().toISOString(),
-      isActive: true
-    };
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
   }
 };
 
@@ -48,22 +38,29 @@ export const getCurrentUser = (): User | null => {
 
 // Set current user
 export const setCurrentUser = (user: User): void => {
-  currentUser = user;
+  // Remove password before storing
+  const { password, ...userWithoutPassword } = user;
+  currentUser = userWithoutPassword as User;
   localStorage.setItem('currentUser', JSON.stringify(currentUser));
+};
+
+// Logout current user
+export const logoutUser = (): void => {
+  currentUser = null;
+  localStorage.removeItem('currentUser');
 };
 
 // Check if user has permission
 export const hasPermission = (requiredRole: UserRole): boolean => {
-  if (!currentUser) {
-    initializeCurrentUser();
-  }
+  const user = getCurrentUser();
   
-  if (!currentUser) return false;
+  if (!user) return false;
+  if (!user.isActive) return false;
   
   // Role hierarchy: admin > manager > viewer
-  if (currentUser.role === 'admin') return true;
-  if (currentUser.role === 'manager' && requiredRole !== 'admin') return true;
-  if (currentUser.role === 'viewer' && requiredRole === 'viewer') return true;
+  if (user.role === 'admin') return true;
+  if (user.role === 'manager' && requiredRole !== 'admin') return true;
+  if (user.role === 'viewer' && requiredRole === 'viewer') return true;
   
   return false;
 };
@@ -122,6 +119,57 @@ const rowToUser = (row: any[], index: number): User => {
   };
 };
 
+// Authenticate user against Google Sheets data
+export const authenticateUser = async (email: string, password: string): Promise<User | null> => {
+  try {
+    // For simplicity, we're using email as the primary key and password as a simple string match
+    // In a real application, you would use proper password hashing
+    
+    // Fetch all users from Google Sheets
+    const data = await fetchSheetData(SPREADSHEET_ID, ADMIN_RANGE);
+    
+    if (!data || data.length === 0) {
+      console.warn("No user data found in Google Sheets for authentication");
+      return null;
+    }
+    
+    // Find user with matching email
+    const userIndex = data.findIndex(row => 
+      row[1]?.toLowerCase() === email.toLowerCase() && row.length >= 2
+    );
+    
+    if (userIndex === -1) {
+      console.warn(`No user found with email: ${email}`);
+      return null;
+    }
+    
+    // In a real application, you would use a secure password field in your sheet
+    // For this demo, we'll use a simple approach where the password is the email
+    // This simulates authentication without requiring actual passwords in the sheet
+    const userEmail = data[userIndex][1];
+    
+    // Check if password matches (in this case, password = email)
+    if (password !== userEmail) {
+      console.warn("Password does not match");
+      return null;
+    }
+    
+    // Convert row to user object
+    const user = rowToUser(data[userIndex], userIndex);
+    
+    // Update last login time
+    user.lastLogin = new Date().toISOString();
+    
+    // Set as current user
+    setCurrentUser(user);
+    
+    return user;
+  } catch (error) {
+    console.error("Authentication error:", error);
+    return null;
+  }
+};
+
 // Get all users from Google Sheets
 export const getUsers = async (): Promise<User[]> => {
   try {
@@ -133,45 +181,39 @@ export const getUsers = async (): Promise<User[]> => {
       return data.map((row, index) => rowToUser(row, index)).filter(user => user.name || user.email); // Filter out empty rows
     }
     
-    // Fall back to mock data if sheet is empty or not accessible
-    console.warn("No user data found in Google Sheets, using mock data");
-    return mockUsers;
+    // Return empty array if no data
+    return [];
   } catch (error) {
     console.error("Error fetching users from Google Sheets:", error);
-    // Fall back to mock data on error
-    return mockUsers;
+    // Return empty array on error
+    return [];
   }
 };
 
 // Get user by ID
 export const getUserById = async (id: string): Promise<User | null> => {
-  try {
-    const users = await getUsers();
-    return users.find(u => u.id === id) || null;
-  } catch (error) {
-    console.error("Error getting user by ID:", error);
-    return null;
-  }
+  const users = await getUsers();
+  return users.find(user => user.id === id) || null;
 };
 
 // Update user role
 export const updateUserRole = async (userId: string, newRole: UserRole): Promise<User | null> => {
   try {
-    // In a real implementation, this would update the Google Sheet
-    // For now, we'll just update the mock data
     const users = await getUsers();
-    const userIndex = users.findIndex(u => u.id === userId);
-    if (userIndex === -1) return null;
+    const userIndex = users.findIndex(user => user.id === userId);
     
-    const updatedUser = {
-      ...users[userIndex],
-      role: newRole
-    };
+    if (userIndex === -1) {
+      console.error(`User with ID ${userId} not found`);
+      return null;
+    }
     
-    // Update in mock data
-    mockUsers[userIndex] = updatedUser;
+    // Update user role
+    users[userIndex].role = newRole;
     
-    return updatedUser;
+    // In a real application, you would update the Google Sheet here
+    // For now, we'll just return the updated user
+    
+    return users[userIndex];
   } catch (error) {
     console.error("Error updating user role:", error);
     return null;
@@ -181,21 +223,21 @@ export const updateUserRole = async (userId: string, newRole: UserRole): Promise
 // Toggle user active status
 export const toggleUserActive = async (userId: string): Promise<User | null> => {
   try {
-    // In a real implementation, this would update the Google Sheet
-    // For now, we'll just update the mock data
     const users = await getUsers();
-    const userIndex = users.findIndex(u => u.id === userId);
-    if (userIndex === -1) return null;
+    const userIndex = users.findIndex(user => user.id === userId);
     
-    const updatedUser = {
-      ...users[userIndex],
-      isActive: !users[userIndex].isActive
-    };
+    if (userIndex === -1) {
+      console.error(`User with ID ${userId} not found`);
+      return null;
+    }
     
-    // Update in mock data
-    mockUsers[userIndex] = updatedUser;
+    // Toggle active status
+    users[userIndex].isActive = !users[userIndex].isActive;
     
-    return updatedUser;
+    // In a real application, you would update the Google Sheet here
+    // For now, we'll just return the updated user
+    
+    return users[userIndex];
   } catch (error) {
     console.error("Error toggling user active status:", error);
     return null;
@@ -205,15 +247,16 @@ export const toggleUserActive = async (userId: string): Promise<User | null> => 
 // Add new user
 export const addUser = async (user: Omit<User, 'id' | 'createdAt'>): Promise<User> => {
   try {
-    // In a real implementation, this would add to the Google Sheet
-    // For now, we'll just add to the mock data
+    // Generate ID and creation date
     const newUser: User = {
       ...user,
-      id: (mockUsers.length + 1).toString(),
+      id: Date.now().toString(),
       createdAt: new Date().toISOString()
     };
     
-    mockUsers.push(newUser);
+    // In a real application, you would add the user to the Google Sheet here
+    // For now, we'll just return the new user
+    
     return newUser;
   } catch (error) {
     console.error("Error adding user:", error);

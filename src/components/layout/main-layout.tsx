@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "../../lib/utils";
 import { Logo } from "../ui/logo";
 import { FullLogo } from "../ui/full-logo";
 import { UserRoleBadge } from "../ui/user-role-badge";
-import { getCurrentUser, hasPermission } from "../../lib/services/user-management";
+import { getCurrentUser, hasPermission, logoutUser } from "../../lib/services/user-management";
+import { toast } from "../ui/use-toast";
+import { Button } from "../ui/button";
 
 interface MainLayoutProps {
   className?: string;
@@ -12,8 +14,10 @@ interface MainLayoutProps {
 
 export function MainLayout({ className }: MainLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   // Get the current page title based on the route
   const getPageTitle = () => {
@@ -29,8 +33,24 @@ export function MainLayout({ className }: MainLayoutProps) {
 
   // Refresh current user when location changes
   useEffect(() => {
-    setCurrentUser(getCurrentUser());
-  }, [location]);
+    const user = getCurrentUser();
+    if (!user) {
+      // Redirect to login if no user is logged in
+      navigate('/login');
+      return;
+    }
+    setCurrentUser(user);
+  }, [location, navigate]);
+
+  // Handle logout
+  const handleLogout = () => {
+    logoutUser();
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -82,6 +102,22 @@ export function MainLayout({ className }: MainLayoutProps) {
               </>
             )}
           </ul>
+          
+          {/* Logout button at bottom of sidebar */}
+          <div className="mt-auto pt-4 border-t mt-8">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleLogout}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Logout
+            </Button>
+          </div>
         </nav>
       </aside>
 
@@ -115,16 +151,42 @@ export function MainLayout({ className }: MainLayoutProps) {
             </button>
             
             {currentUser && (
-              <div className="flex items-center gap-2">
-                <div className="hidden md:block text-right">
-                  <div className="text-sm font-medium">{currentUser.name}</div>
-                  <div className="text-xs text-muted-foreground flex items-center gap-1">
-                    <UserRoleBadge role={currentUser.role} />
+              <div className="relative">
+                <div 
+                  className="flex items-center gap-2 cursor-pointer"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                >
+                  <div className="hidden md:block text-right">
+                    <div className="text-sm font-medium">{currentUser.name}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <UserRoleBadge role={currentUser.role} />
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
+                    {currentUser.name.charAt(0).toUpperCase()}
                   </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
-                  {currentUser.name.charAt(0).toUpperCase()}
-                </div>
+                
+                {/* User dropdown menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border">
+                    <div className="px-4 py-2 border-b">
+                      <div className="text-sm font-medium">{currentUser.name}</div>
+                      <div className="text-xs text-muted-foreground">{currentUser.email}</div>
+                    </div>
+                    <button 
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                      onClick={handleLogout}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                      </svg>
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -175,6 +237,21 @@ export function MainLayout({ className }: MainLayoutProps) {
                     />
                   </>
                 )}
+                
+                {/* Mobile logout button */}
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium w-full text-red-600 hover:bg-red-50"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                      <polyline points="16 17 21 12 16 7"></polyline>
+                      <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Logout
+                  </button>
+                </li>
               </ul>
             </nav>
           </div>

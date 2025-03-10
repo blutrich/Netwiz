@@ -20,7 +20,7 @@ export function LandingPage() {
             {darkMode ? 'Light Mode' : 'Dark Mode'}
           </Button>
           <Button asChild>
-            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/login">Sign In</Link>
           </Button>
         </div>
       </header>
@@ -37,7 +37,7 @@ export function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
-              <Link to="/dashboard">Go to Dashboard</Link>
+              <Link to="/login">Sign In</Link>
             </Button>
             <Button size="lg" variant="outline" asChild className={darkMode ? 'border-white text-white hover:bg-blue-900' : ''}>
               <a href="https://github.com/blutrich/Netwiz" target="_blank" rel="noopener noreferrer">View on GitHub</a>
