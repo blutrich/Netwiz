@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "buildCommand": "node vercel-build.js",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "routes": [
     {
