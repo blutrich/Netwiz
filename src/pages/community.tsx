@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useExperts } from "@/hooks/use-sheets-data";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { useExperts } from "../hooks/use-sheets-data";
 import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
-} from "@/components/ui/select";
+} from "../components/ui/select";
 
 export function CommunityPage() {
   const [sectorFilter, setSectorFilter] = useState<string | undefined>(undefined);
@@ -50,13 +50,13 @@ export function CommunityPage() {
         <div className="flex gap-2">
           <Select
             value={sectorFilter}
-            onValueChange={(value) => setSectorFilter(value || undefined)}
+            onValueChange={(value) => setSectorFilter(value === 'all' ? undefined : value)}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by sector" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Sectors</SelectItem>
+              <SelectItem value="all">All Sectors</SelectItem>
               <SelectItem value="Consultant">Consultant</SelectItem>
               <SelectItem value="Chief of Staff">Chief of Staff</SelectItem>
               <SelectItem value="COO">COO</SelectItem>

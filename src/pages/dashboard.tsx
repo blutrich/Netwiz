@@ -1,14 +1,55 @@
-import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { useExperts, useRequests } from "../hooks/use-sheets-data";
+import { Expert, Request } from "../lib/services/google-sheets";
 
 export function DashboardPage() {
-  // Normally we would fetch this data from an API
+  const { experts, loading: expertsLoading } = useExperts();
+  const { requests, loading: requestsLoading, stats: requestStats } = useRequests();
+  const [categories, setCategories] = useState<{ name: string; count: number; percentage: number }[]>([]);
+  
+  // Calculate dashboard stats
   const stats = {
-    totalRequests: 124,
-    activeRequests: 12,
-    successfulConnections: 87,
-    communityMembers: 45,
+    totalRequests: requests.length,
+    activeRequests: requests.filter(r => r.status === 'expert_contacted' || r.status === 'matched').length,
+    successfulConnections: requests.filter(r => r.status === 'completed').length,
+    communityMembers: experts.length,
   };
+  
+  // Calculate category distribution
+  useEffect(() => {
+    if (requests.length > 0) {
+      // Group requests by sector
+      const sectorCounts: Record<string, number> = {};
+      requests.forEach(request => {
+        const sector = request.sector || 'Uncategorized';
+        sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+      });
+      
+      // Convert to array and calculate percentages
+      const total = requests.length;
+      const categoriesArray = Object.entries(sectorCounts).map(([name, count]) => ({
+        name,
+        count,
+        percentage: Math.round((count / total) * 100)
+      }));
+      
+      // Sort by count (descending)
+      categoriesArray.sort((a, b) => b.count - a.count);
+      
+      setCategories(categoriesArray.slice(0, 5)); // Top 5 categories
+    }
+  }, [requests]);
+
+  // Loading state
+  if (expertsLoading || requestsLoading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground">Loading dashboard data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -50,24 +91,29 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="p-3 bg-muted/50 rounded-md">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">Request #{i}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Looking for help with technology integration
-                      </p>
+              {requests.length === 0 ? (
+                <p className="text-muted-foreground">No requests found</p>
+              ) : (
+                // Show the 3 most recent requests
+                requests.slice(0, 3).map((request) => (
+                  <div key={request.requestId} className="p-3 bg-muted/50 rounded-md">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium">Request #{request.requestId}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {request.requestMessage}
+                        </p>
+                      </div>
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                        {request.sector || 'General'}
+                      </span>
                     </div>
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                      Technology
-                    </span>
+                    <div className="mt-2 text-sm text-muted-foreground">
+                      {new Date(request.createdAt).toLocaleDateString()}
+                    </div>
                   </div>
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    {new Date().toLocaleDateString()}
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -81,26 +127,24 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {[
-                { name: "Technology", count: 45, percentage: 36 },
-                { name: "Recruitment", count: 32, percentage: 26 },
-                { name: "Funding", count: 24, percentage: 19 },
-                { name: "Business", count: 15, percentage: 12 },
-                { name: "Community", count: 8, percentage: 7 },
-              ].map((category) => (
-                <div key={category.name} className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span>{category.name}</span>
-                    <span className="font-medium">{category.count}</span>
+              {categories.length === 0 ? (
+                <p className="text-muted-foreground">No categories found</p>
+              ) : (
+                categories.map((category) => (
+                  <div key={category.name} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>{category.name}</span>
+                      <span className="font-medium">{category.count}</span>
+                    </div>
+                    <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary"
+                        style={{ width: `${category.percentage}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary"
-                      style={{ width: `${category.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

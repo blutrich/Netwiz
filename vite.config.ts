@@ -10,4 +10,17 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    // Polyfill for Node.js globals
+    'process.env': {},
+    'global': {},
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      // Node.js global to browser globalThis
+      define: {
+        global: 'globalThis',
+      },
+    },
+  },
 }) 

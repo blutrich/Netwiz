@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRequests } from "@/hooks/use-sheets-data";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { useRequests } from "../hooks/use-sheets-data";
 import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
-} from "@/components/ui/select";
+} from "../components/ui/select";
 
 export function RequestsPage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
@@ -68,13 +68,13 @@ export function RequestsPage() {
         <div className="flex gap-2">
           <Select
             value={statusFilter}
-            onValueChange={(value) => setStatusFilter(value || undefined)}
+            onValueChange={(value) => setStatusFilter(value === 'all' ? undefined : value)}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="expert_contacted">Expert Contacted</SelectItem>
               <SelectItem value="matched">Matched</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
