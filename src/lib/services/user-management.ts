@@ -10,8 +10,14 @@ export interface User {
   isActive: boolean;
 }
 
-// Mock current user - in a real app, this would come from authentication
+// Current user stored in memory
 let currentUser: User | null = null;
+
+// Google Sheets configuration
+const SPREADSHEET_ID = import.meta.env.VITE_EXPERT_SHEET_ID || "";
+const ADMIN_TAB_NAME = "admin"; // The name of your admin tab
+const ADMIN_RANGE = `${ADMIN_TAB_NAME}!A2:G100`; // Adjust range as needed
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "";
 
 // Initialize with admin user if none exists
 const initializeCurrentUser = () => {
@@ -62,7 +68,143 @@ export const hasPermission = (requiredRole: UserRole): boolean => {
   return false;
 };
 
-// Mock users list - in a real app, this would come from Google Sheets
+// Fetch data from Google Sheets API (copied from google-sheets.ts)
+async function fetchSheetData(spreadsheetId: string, range: string): Promise<any[][]> {
+  try {
+    console.log(`Fetching data from spreadsheet: ${spreadsheetId}, range: ${range}`);
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${API_KEY}`;
+    console.log(`API URL: ${url}`);
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error Response: ${errorText}`);
+      throw new Error(`Google Sheets API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('API Response:', data);
+    return data.values || [];
+  } catch (error) {
+    console.error('Error fetching sheet data:', error);
+    throw error;
+  }
+}
+
+// Convert sheet row to User object
+const rowToUser = (row: any[]): User => {
+  return {
+    id: row[0] || String(Math.random()),
+    email: row[1] || "",
+    name: row[2] || "",
+    role: (row[3] as UserRole) || "viewer",
+    createdAt: row[4] || new Date().toISOString(),
+    lastLogin: row[5] || undefined,
+    isActive: row[6] === "TRUE" || row[6] === true || row[6] === "true"
+  };
+};
+
+// Get all users from Google Sheets
+export const getUsers = async (): Promise<User[]> => {
+  try {
+    // Try to fetch from Google Sheets
+    const data = await fetchSheetData(SPREADSHEET_ID, ADMIN_RANGE);
+    
+    if (data && data.length > 0) {
+      // Convert sheet data to User objects
+      return data.map(rowToUser).filter(user => user.email); // Filter out empty rows
+    }
+    
+    // Fall back to mock data if sheet is empty or not accessible
+    console.warn("No user data found in Google Sheets, using mock data");
+    return mockUsers;
+  } catch (error) {
+    console.error("Error fetching users from Google Sheets:", error);
+    // Fall back to mock data on error
+    return mockUsers;
+  }
+};
+
+// Get user by ID
+export const getUserById = async (id: string): Promise<User | null> => {
+  try {
+    const users = await getUsers();
+    return users.find(u => u.id === id) || null;
+  } catch (error) {
+    console.error("Error getting user by ID:", error);
+    return null;
+  }
+};
+
+// Update user role
+export const updateUserRole = async (userId: string, newRole: UserRole): Promise<User | null> => {
+  try {
+    // In a real implementation, this would update the Google Sheet
+    // For now, we'll just update the mock data
+    const users = await getUsers();
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) return null;
+    
+    const updatedUser = {
+      ...users[userIndex],
+      role: newRole
+    };
+    
+    // Update in mock data
+    mockUsers[userIndex] = updatedUser;
+    
+    return updatedUser;
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    return null;
+  }
+};
+
+// Toggle user active status
+export const toggleUserActive = async (userId: string): Promise<User | null> => {
+  try {
+    // In a real implementation, this would update the Google Sheet
+    // For now, we'll just update the mock data
+    const users = await getUsers();
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) return null;
+    
+    const updatedUser = {
+      ...users[userIndex],
+      isActive: !users[userIndex].isActive
+    };
+    
+    // Update in mock data
+    mockUsers[userIndex] = updatedUser;
+    
+    return updatedUser;
+  } catch (error) {
+    console.error("Error toggling user active status:", error);
+    return null;
+  }
+};
+
+// Add new user
+export const addUser = async (user: Omit<User, 'id' | 'createdAt'>): Promise<User> => {
+  try {
+    // In a real implementation, this would add to the Google Sheet
+    // For now, we'll just add to the mock data
+    const newUser: User = {
+      ...user,
+      id: (mockUsers.length + 1).toString(),
+      createdAt: new Date().toISOString()
+    };
+    
+    mockUsers.push(newUser);
+    return newUser;
+  } catch (error) {
+    console.error("Error adding user:", error);
+    throw error;
+  }
+};
+
+// Mock users list - used as fallback when Google Sheets is not available
 const mockUsers: User[] = [
   {
     id: '1',
@@ -100,57 +242,4 @@ const mockUsers: User[] = [
     lastLogin: '2023-05-01T11:20:00Z',
     isActive: false
   }
-];
-
-// Get all users
-export const getUsers = async (): Promise<User[]> => {
-  // In a real app, this would fetch from Google Sheets
-  return Promise.resolve(mockUsers);
-};
-
-// Get user by ID
-export const getUserById = async (id: string): Promise<User | null> => {
-  const user = mockUsers.find(u => u.id === id);
-  return Promise.resolve(user || null);
-};
-
-// Update user role
-export const updateUserRole = async (userId: string, newRole: UserRole): Promise<User | null> => {
-  // In a real app, this would update the Google Sheet
-  const userIndex = mockUsers.findIndex(u => u.id === userId);
-  if (userIndex === -1) return null;
-  
-  mockUsers[userIndex] = {
-    ...mockUsers[userIndex],
-    role: newRole
-  };
-  
-  return Promise.resolve(mockUsers[userIndex]);
-};
-
-// Toggle user active status
-export const toggleUserActive = async (userId: string): Promise<User | null> => {
-  // In a real app, this would update the Google Sheet
-  const userIndex = mockUsers.findIndex(u => u.id === userId);
-  if (userIndex === -1) return null;
-  
-  mockUsers[userIndex] = {
-    ...mockUsers[userIndex],
-    isActive: !mockUsers[userIndex].isActive
-  };
-  
-  return Promise.resolve(mockUsers[userIndex]);
-};
-
-// Add new user
-export const addUser = async (user: Omit<User, 'id' | 'createdAt'>): Promise<User> => {
-  // In a real app, this would add to the Google Sheet
-  const newUser: User = {
-    ...user,
-    id: (mockUsers.length + 1).toString(),
-    createdAt: new Date().toISOString()
-  };
-  
-  mockUsers.push(newUser);
-  return Promise.resolve(newUser);
-}; 
+]; 
