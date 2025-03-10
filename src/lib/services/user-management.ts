@@ -274,12 +274,19 @@ export const updateUserRole = async (userId: string, newRole: UserRole): Promise
     // Update user role
     users[userIndex].role = newRole;
     
-    // Update in Google Sheets
-    // Since we're using row index as ID, we can calculate the row number
-    const rowNumber = parseInt(userId) + 1; // +1 because we're 0-indexed and sheets are 1-indexed
-    
-    // Update the role cell (column C)
-    await updateSheetCell(SPREADSHEET_ID, `${ADMIN_TAB_NAME}!C${rowNumber + 1}`, newRole);
+    // Try to update in Google Sheets, but don't fail if it doesn't work
+    try {
+      // Since we're using row index as ID, we can calculate the row number
+      const rowNumber = parseInt(userId) + 1; // +1 because we're 0-indexed and sheets are 1-indexed
+      
+      // Update the role cell (column C)
+      await updateSheetCell(SPREADSHEET_ID, `${ADMIN_TAB_NAME}!C${rowNumber + 1}`, newRole);
+      console.log("Successfully updated user role in Google Sheets");
+    } catch (error) {
+      console.warn("Could not update user role in Google Sheets due to API limitations:", error);
+      console.log("User role was updated in the application but not in Google Sheets.");
+      console.log(`To update this user's role in Google Sheets, manually set cell C${parseInt(userId) + 2} to: ${newRole}`);
+    }
     
     return users[userIndex];
   } catch (error) {
@@ -302,13 +309,20 @@ export const toggleUserActive = async (userId: string): Promise<User | null> => 
     // Toggle active status
     users[userIndex].isActive = !users[userIndex].isActive;
     
-    // Update in Google Sheets
-    // Since we're using row index as ID, we can calculate the row number
-    const rowNumber = parseInt(userId) + 1; // +1 because we're 0-indexed and sheets are 1-indexed
-    
-    // Update the status cell (column D)
-    const newStatus = users[userIndex].isActive ? "Active" : "Inactive";
-    await updateSheetCell(SPREADSHEET_ID, `${ADMIN_TAB_NAME}!D${rowNumber + 1}`, newStatus);
+    // Try to update in Google Sheets, but don't fail if it doesn't work
+    try {
+      // Since we're using row index as ID, we can calculate the row number
+      const rowNumber = parseInt(userId) + 1; // +1 because we're 0-indexed and sheets are 1-indexed
+      
+      // Update the status cell (column D)
+      const newStatus = users[userIndex].isActive ? "Active" : "Inactive";
+      await updateSheetCell(SPREADSHEET_ID, `${ADMIN_TAB_NAME}!D${rowNumber + 1}`, newStatus);
+      console.log("Successfully updated user status in Google Sheets");
+    } catch (error) {
+      console.warn("Could not update user status in Google Sheets due to API limitations:", error);
+      console.log("User status was updated in the application but not in Google Sheets.");
+      console.log(`To update this user's status in Google Sheets, manually set cell D${parseInt(userId) + 2} to: ${users[userIndex].isActive ? "Active" : "Inactive"}`);
+    }
     
     return users[userIndex];
   } catch (error) {
@@ -337,8 +351,16 @@ export const addUser = async (user: Omit<User, 'id' | 'createdAt'>): Promise<Use
       newUser.lastLogin || ""
     ];
     
-    // Append to Google Sheets
-    await appendToSheet(SPREADSHEET_ID, ADMIN_TAB_NAME, rowData);
+    // Try to append to Google Sheets, but don't fail if it doesn't work
+    try {
+      await appendToSheet(SPREADSHEET_ID, ADMIN_TAB_NAME, rowData);
+      console.log("Successfully added user to Google Sheets");
+    } catch (error) {
+      console.warn("Could not add user to Google Sheets due to API limitations:", error);
+      console.log("User was added to the application but not to Google Sheets.");
+      console.log("To add this user to Google Sheets, manually add the following row:");
+      console.log(rowData);
+    }
     
     return newUser;
   } catch (error) {
@@ -354,6 +376,7 @@ async function appendToSheet(spreadsheetId: string, sheetName: string, rowData: 
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
     
     console.log(`Appending data to spreadsheet: ${spreadsheetId}, range: ${range}`);
+    console.log("Note: This operation requires OAuth2 authentication and may fail with just an API key");
     
     const response = await fetch(url, {
       method: 'POST',
@@ -386,6 +409,7 @@ async function updateSheetCell(spreadsheetId: string, range: string, value: stri
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?valueInputOption=USER_ENTERED&key=${API_KEY}`;
     
     console.log(`Updating cell in spreadsheet: ${spreadsheetId}, range: ${range}, value: ${value}`);
+    console.log("Note: This operation requires OAuth2 authentication and may fail with just an API key");
     
     const response = await fetch(url, {
       method: 'PUT',
