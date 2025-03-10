@@ -10,7 +10,9 @@
     }
   ],
   "github": {
-    "silent": true
+    "silent": true,
+    "enabled": true,
+    "autoAlias": true
   },
   "env": {
     "VITE_GOOGLE_API_KEY": "@vite_google_api_key",

@@ -1,0 +1,4 @@
+# Ignore TypeScript errors
+*.ts
+*.tsx
+tsconfig.json 
