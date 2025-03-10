@@ -18,7 +18,7 @@ NetWizBot is a web application that helps WhatsApp communities connect members a
 - **UI Components**: shadcn/ui, Tailwind CSS
 - **Data Management**: Google Sheets API integration
 - **Authentication**: Custom authentication system
-- **Deployment**: Vercel
+- **Deployment**: Netlify or Vercel
 
 ## Getting Started
 
@@ -27,7 +27,7 @@ NetWizBot is a web application that helps WhatsApp communities connect members a
 - Node.js (v16 or higher)
 - npm or yarn
 - Google Sheets API key
-- Vercel CLI (for deployment)
+- Netlify or Vercel CLI (for deployment)
 
 ### Installation
 
@@ -79,7 +79,44 @@ NetWizBot is a web application that helps WhatsApp communities connect members a
 
 ## Deployment
 
-### Vercel Deployment (Recommended)
+### Netlify Deployment (Recommended)
+
+1. Install Netlify CLI:
+   ```
+   npm install -g netlify-cli
+   ```
+
+2. Login to Netlify:
+   ```
+   netlify login
+   ```
+
+3. Deploy using the deployment script:
+   ```
+   chmod +x deploy-netlify.sh
+   ./deploy-netlify.sh
+   ```
+
+Alternatively, you can connect your GitHub repository to Netlify for automatic deployments:
+
+1. Push your code to GitHub
+2. Create a new site in Netlify and connect to your GitHub repository
+3. Configure the build settings:
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+4. Add environment variables in the Netlify dashboard:
+   - VITE_GOOGLE_API_KEY
+   - VITE_EXPERT_SHEET_ID
+   - VITE_REQUEST_SHEET_ID
+
+Benefits of using Netlify:
+- Automatic deployments when you push to GitHub
+- Deploy previews for pull requests
+- Built-in SSL/TLS certificates
+- Easy environment variable management
+- Global CDN for fast loading
+
+### Vercel Deployment (Alternative)
 
 1. Install Vercel CLI:
    ```
@@ -103,9 +140,7 @@ The deployment script performs the following actions:
 - Builds the project with production settings
 - Deploys to Vercel with the correct environment variables
 
-### Alternative Deployment Methods
-
-#### Static Deployment
+### Static Deployment (Testing Only)
 For testing purposes, you can deploy just the static assets:
 ```
 chmod +x deploy-static.sh
@@ -143,7 +178,7 @@ chmod +x deploy-static.sh
 ### Common Issues
 
 1. **App Not Loading After Deployment**:
-   - Check if environment variables are set correctly in Vercel
+   - Check if environment variables are set correctly in Netlify/Vercel
    - Ensure Google API key has proper permissions
    - Verify that the Google Sheets IDs are correct
 
@@ -159,4 +194,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - shadcn/ui for the component library
-- Google Sheets API for data storage 
+- Google Sheets API for data storage

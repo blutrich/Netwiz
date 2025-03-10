@@ -1,0 +1,25 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  
+[build.environment]
+  # DO NOT PUT ACTUAL VALUES HERE - SET THESE IN NETLIFY DASHBOARD
+  # VITE_GOOGLE_API_KEY = "YOUR_GOOGLE_API_KEY" 
+  # VITE_EXPERT_SHEET_ID = "YOUR_EXPERT_SHEET_ID" 
+  # VITE_REQUEST_SHEET_ID = "YOUR_REQUEST_SHEET_ID"
+
+# Redirects for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers to improve security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://sheets.googleapis.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin" 
