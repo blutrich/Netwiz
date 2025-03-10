@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { cn } from "../../lib/utils";
 import { Logo } from "../ui/logo";
+import { FullLogo } from "../ui/full-logo";
 
 interface MainLayoutProps {
   className?: string;
@@ -14,11 +15,11 @@ export function MainLayout({ className }: MainLayoutProps) {
   // Get the current page title based on the route
   const getPageTitle = () => {
     const path = location.pathname;
-    if (path === '/') return 'Dashboard';
-    if (path === '/community') return 'Community Members';
-    if (path === '/requests') return 'Requests';
-    if (path === '/analytics') return 'Analytics';
-    if (path === '/settings') return 'Settings';
+    if (path === '/dashboard' || path === '/dashboard/') return 'Dashboard';
+    if (path.includes('/dashboard/community')) return 'Community Members';
+    if (path.includes('/dashboard/requests')) return 'Requests';
+    if (path.includes('/dashboard/analytics')) return 'Analytics';
+    if (path.includes('/dashboard/settings')) return 'Settings';
     return 'Admin Dashboard';
   };
 
@@ -27,16 +28,35 @@ export function MainLayout({ className }: MainLayoutProps) {
       {/* Sidebar */}
       <aside className="bg-card w-64 border-r shadow-sm hidden md:block">
         <div className="p-4 h-16 border-b flex items-center">
-          <Logo size={28} className="mr-2 text-blue-500" />
-          <h1 className="text-xl font-bold">NetWizBot</h1>
+          <FullLogo size={28} />
         </div>
         <nav className="p-2">
           <ul className="space-y-1">
-            <NavItem to="/" label="Dashboard" active={location.pathname === '/'} />
-            <NavItem to="/community" label="Community Members" active={location.pathname === '/community'} />
-            <NavItem to="/requests" label="Requests" active={location.pathname === '/requests'} />
-            <NavItem to="/analytics" label="Analytics" active={location.pathname === '/analytics'} />
-            <NavItem to="/settings" label="Settings" active={location.pathname === '/settings'} />
+            <NavItem 
+              to="/dashboard" 
+              label="Dashboard" 
+              active={location.pathname === '/dashboard' || location.pathname === '/dashboard/'} 
+            />
+            <NavItem 
+              to="/dashboard/community" 
+              label="Community Members" 
+              active={location.pathname.includes('/dashboard/community')} 
+            />
+            <NavItem 
+              to="/dashboard/requests" 
+              label="Requests" 
+              active={location.pathname.includes('/dashboard/requests')} 
+            />
+            <NavItem 
+              to="/dashboard/analytics" 
+              label="Analytics" 
+              active={location.pathname.includes('/dashboard/analytics')} 
+            />
+            <NavItem 
+              to="/dashboard/settings" 
+              label="Settings" 
+              active={location.pathname.includes('/dashboard/settings')} 
+            />
           </ul>
         </nav>
       </aside>
@@ -58,8 +78,7 @@ export function MainLayout({ className }: MainLayoutProps) {
               </button>
             </div>
             <div className="md:hidden flex items-center">
-              <Logo size={24} className="mr-2 text-blue-500" />
-              <span className="text-lg font-bold">NetWizBot</span>
+              <FullLogo size={24} />
             </div>
             <h2 className="text-lg font-medium hidden md:block">{getPageTitle()}</h2>
           </div>
@@ -81,11 +100,31 @@ export function MainLayout({ className }: MainLayoutProps) {
           <div className="md:hidden border-b bg-card">
             <nav className="p-2">
               <ul className="space-y-1">
-                <NavItem to="/" label="Dashboard" active={location.pathname === '/'} />
-                <NavItem to="/community" label="Community Members" active={location.pathname === '/community'} />
-                <NavItem to="/requests" label="Requests" active={location.pathname === '/requests'} />
-                <NavItem to="/analytics" label="Analytics" active={location.pathname === '/analytics'} />
-                <NavItem to="/settings" label="Settings" active={location.pathname === '/settings'} />
+                <NavItem 
+                  to="/dashboard" 
+                  label="Dashboard" 
+                  active={location.pathname === '/dashboard' || location.pathname === '/dashboard/'} 
+                />
+                <NavItem 
+                  to="/dashboard/community" 
+                  label="Community Members" 
+                  active={location.pathname.includes('/dashboard/community')} 
+                />
+                <NavItem 
+                  to="/dashboard/requests" 
+                  label="Requests" 
+                  active={location.pathname.includes('/dashboard/requests')} 
+                />
+                <NavItem 
+                  to="/dashboard/analytics" 
+                  label="Analytics" 
+                  active={location.pathname.includes('/dashboard/analytics')} 
+                />
+                <NavItem 
+                  to="/dashboard/settings" 
+                  label="Settings" 
+                  active={location.pathname.includes('/dashboard/settings')} 
+                />
               </ul>
             </nav>
           </div>
