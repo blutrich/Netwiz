@@ -23,4 +23,11 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    // Skip TypeScript type checking during build
+    sourcemap: true,
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    }
+  }
 }) 
