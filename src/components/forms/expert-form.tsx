@@ -183,22 +183,28 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
         body: JSON.stringify(data)
       });
 
+      const text = await response.text();
+      console.log('Server response:', text);
+
       let responseData;
       try {
-        const text = await response.text();
         responseData = text ? JSON.parse(text) : { success: false, message: 'Empty response from server' };
       } catch (parseError) {
         console.error('Failed to parse response:', parseError);
-        throw new Error('Invalid response from server');
+        throw new Error(`Server returned invalid JSON: ${text.substring(0, 100)}`);
       }
 
-      if (!response.ok || !responseData.success) {
-        throw new Error(responseData.message || responseData.error || 'Failed to submit form');
+      if (!responseData.success) {
+        throw new Error(
+          responseData.message || 
+          responseData.error || 
+          `Submission failed with status ${response.status}`
+        );
       }
 
       toast({
         title: "Success",
-        description: responseData.message || "Thank you for joining our expert network! We'll be in touch soon.",
+        description: "Thank you for joining our expert network! We'll be in touch soon.",
         variant: "default"
       });
 
@@ -209,7 +215,9 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
       console.error('Submission error:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to submit expert information. Please try again.",
+        description: error instanceof Error 
+          ? error.message 
+          : "Failed to submit expert information. Please try again.",
         variant: "destructive"
       });
     } finally {

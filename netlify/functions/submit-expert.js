@@ -1,8 +1,11 @@
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
+  console.log('Function started');
+  
   // Only allow POST
   if (event.httpMethod !== 'POST') {
+    console.log('Method not allowed:', event.httpMethod);
     return {
       statusCode: 405,
       body: JSON.stringify({ 
@@ -18,11 +21,11 @@ exports.handler = async function(event, context) {
 
   try {
     const data = JSON.parse(event.body);
-    console.log('Received data:', data);
+    console.log('Received data:', JSON.stringify(data, null, 2));
     
     // Forward the request to Make.com
     console.log('Sending request to Make.com...');
-    const response = await fetch('https://hook.eu1.make.com/ax2go8kwme53tt4mswjomc82sevbk48f', {
+    const makeResponse = await fetch('https://hook.eu1.make.com/ax2go8kwme53tt4mswjomc82sevbk48f', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -31,35 +34,23 @@ exports.handler = async function(event, context) {
       body: JSON.stringify(data)
     });
 
-    console.log('Make.com response status:', response.status);
-    const responseData = await response.text();
-    console.log('Make.com response data:', responseData);
+    console.log('Make.com response status:', makeResponse.status);
+    console.log('Make.com response headers:', makeResponse.headers);
     
-    let parsedResponse;
-    try {
-      parsedResponse = responseData ? JSON.parse(responseData) : { success: response.ok };
-    } catch (e) {
-      console.log('Failed to parse Make.com response as JSON:', e);
-      parsedResponse = { 
-        success: response.ok,
-        message: responseData || 'Submission received'
-      };
-    }
+    const responseText = await makeResponse.text();
+    console.log('Make.com raw response:', responseText);
 
-    if (!response.ok) {
-      console.error('Make.com error response:', response.status, parsedResponse);
-      throw new Error(parsedResponse.message || `Make.com responded with ${response.status}`);
-    }
-
+    // Always return a valid JSON response
     const successResponse = {
-      success: true,
-      message: 'Expert submission successful',
-      data: parsedResponse
+      success: makeResponse.ok,
+      message: makeResponse.ok ? 'Expert submission successful' : 'Failed to submit to Make.com',
+      status: makeResponse.status,
+      makeResponse: responseText || null
     };
     
-    console.log('Sending success response:', successResponse);
+    console.log('Sending response:', JSON.stringify(successResponse, null, 2));
     return {
-      statusCode: 200,
+      statusCode: makeResponse.ok ? 200 : 422,
       body: JSON.stringify(successResponse),
       headers: { 
         'Content-Type': 'application/json',
@@ -70,11 +61,11 @@ exports.handler = async function(event, context) {
     console.error('Submission error:', error);
     const errorResponse = { 
       success: false,
-      message: 'Failed to submit expert information',
+      message: 'Failed to process expert submission',
       error: error.message || 'Unknown error'
     };
     
-    console.log('Sending error response:', errorResponse);
+    console.log('Sending error response:', JSON.stringify(errorResponse, null, 2));
     return {
       statusCode: 500,
       body: JSON.stringify(errorResponse),
