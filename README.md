@@ -1,5 +1,7 @@
 # NetWizBot
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/YOUR-NETLIFY-SITE-ID/deploy-status)](https://app.netlify.com/sites/netwiz/deploys)
+
 NetWizBot is a web application that helps WhatsApp communities connect members anonymously for mentorship, advice, and collaboration.
 
 ## Features
