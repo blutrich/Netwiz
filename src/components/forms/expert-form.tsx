@@ -20,7 +20,7 @@ interface ExpertFormData {
   email: string;
   linkedin: string;
   location: string;
-  availability: "Happy to help" | "Not available";
+  availability: "Open To help" | "Not available";
 }
 
 interface ExpertFormProps {
@@ -39,11 +39,11 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
     email: "",
     linkedin: "",
     location: "",
-    availability: "Happy to help"
+    availability: "Open To help"
   });
 
   const availabilityOptions = [
-    "Happy to help",
+    "Open To help",
     "Not available"
   ] as const;
 
@@ -174,14 +174,32 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
         }
       };
 
-      const response = await fetch('/.netlify/functions/submit-expert', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(data)
+      const response = await fetch(
+        process.env.NODE_ENV === 'development' 
+          ? 'http://localhost:9999/.netlify/functions/submit-expert'
+          : '/.netlify/functions/submit-expert',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          mode: 'cors',
+          credentials: 'same-origin',
+          body: JSON.stringify(data)
+        }
+      ).catch(error => {
+        console.error('Network error:', error);
+        throw new Error(
+          process.env.NODE_ENV === 'development'
+            ? `Network error - Make sure Netlify Dev server is running (netlify dev): ${error.message}`
+            : 'Network error - Please check your connection and try again'
+        );
       });
+
+      if (!response) {
+        throw new Error('No response received from server');
+      }
 
       const text = await response.text();
       console.log('Server response:', text);
@@ -408,7 +426,7 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
               </label>
               <Select
                 value={formData.availability}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, availability: value as "Happy to help" | "Not available" }))}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, availability: value as "Open To help" | "Not available" }))}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select availability" />

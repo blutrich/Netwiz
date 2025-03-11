@@ -3,12 +3,13 @@
   publish = "dist"
   functions = "netlify/functions"
   
-[build.environment]
-  NODE_VERSION = "20"
-  # DO NOT PUT ACTUAL VALUES HERE - SET THESE IN NETLIFY DASHBOARD
-  # VITE_GOOGLE_API_KEY = "YOUR_GOOGLE_API_KEY" 
-  # VITE_EXPERT_SHEET_ID = "YOUR_EXPERT_SHEET_ID" 
-  # VITE_REQUEST_SHEET_ID = "YOUR_REQUEST_SHEET_ID"
+[dev]
+  command = "npm run dev"
+  port = 9999
+  targetPort = 5173
+  publish = "dist"
+  framework = "#custom"
+  autoLaunch = true
 
 # Redirects for client-side routing
 [[redirects]]
@@ -22,7 +23,7 @@
   [headers.values]
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
-    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://sheets.googleapis.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://sheets.googleapis.com http://localhost:* https://hook.eu1.make.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
