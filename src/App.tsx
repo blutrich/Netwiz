@@ -9,8 +9,9 @@ import { LandingPage } from "./pages/landing";
 import { LoginPage } from "./pages/login";
 import { UsersPage } from "./pages/users";
 import { UnauthorizedPage } from "./pages/unauthorized";
-import { ToastContainer } from "./components/ui/use-toast";
 import { ProtectedRoute } from "./components/auth/protected-route";
+import { ShareExpertFormPage } from "./pages/share-expert-form";
+import { Toaster } from "./components/ui/toaster";
 
 function App() {
   return (
@@ -65,10 +66,12 @@ function App() {
         <Route path="/analytics" element={<Navigate to="/dashboard/analytics" replace />} />
         <Route path="/settings" element={<Navigate to="/dashboard/settings" replace />} />
         <Route path="/users" element={<Navigate to="/dashboard/users" replace />} />
+
+        <Route path="/join-as-expert" element={<ShareExpertFormPage />} />
       </Routes>
       
       {/* Toast notifications */}
-      <ToastContainer />
+      <Toaster />
     </BrowserRouter>
   );
 }

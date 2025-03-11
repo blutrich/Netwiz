@@ -18,6 +18,7 @@ import {
   Cell,
   Sector
 } from "recharts";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 
 // Define colors for charts
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -239,37 +240,39 @@ export function AnalyticsPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Analytics</h1>
-          <p className="text-muted-foreground">
-            Performance metrics and insights for your community
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            variant={timeframe === 'week' ? 'default' : 'outline'}
-            onClick={() => setTimeframe('week')}
-          >
-            This Week
-          </Button>
-          <Button 
-            variant={timeframe === 'month' ? 'default' : 'outline'}
-            onClick={() => setTimeframe('month')}
-          >
-            This Month
-          </Button>
-          <Button 
-            variant={timeframe === 'all' ? 'default' : 'outline'}
-            onClick={() => setTimeframe('all')}
-          >
-            All Time
-          </Button>
-        </div>
+    <div className="space-y-6 p-2 sm:p-4 md:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold">Analytics Dashboard</h1>
+      <p className="text-muted-foreground">
+        Analyze your community's performance and engagement metrics.
+      </p>
+
+      {/* Time period selector */}
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+        <Button
+          variant={timeframe === 'week' ? 'default' : 'outline'}
+          onClick={() => setTimeframe('week')}
+          className="whitespace-nowrap"
+        >
+          Last Week
+        </Button>
+        <Button
+          variant={timeframe === 'month' ? 'default' : 'outline'}
+          onClick={() => setTimeframe('month')}
+          className="whitespace-nowrap"
+        >
+          Last Month
+        </Button>
+        <Button
+          variant={timeframe === 'all' ? 'default' : 'outline'}
+          onClick={() => setTimeframe('all')}
+          className="whitespace-nowrap"
+        >
+          All Time
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard 
           title="Total Requests" 
           value={totalRequests.toString()} 
@@ -293,144 +296,92 @@ export function AnalyticsPage() {
         />
       </div>
 
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
-            <CardTitle>
-              {timeframe === 'week' ? 'Weekly Activity' : 
-               timeframe === 'month' ? 'Monthly Activity' : 'All Time Activity'}
-            </CardTitle>
-            <CardDescription>
-              Requests and successful connections
-            </CardDescription>
+            <CardTitle>Request Trends</CardTitle>
+            <CardDescription>Requests and successful connections over time</CardDescription>
           </CardHeader>
           <CardContent>
-            {weeklyData.length === 0 ? (
-              <p className="text-center text-muted-foreground py-10">No data available for this period</p>
-            ) : (
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={weeklyData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="day" />
-                    <YAxis />
-                    <Tooltip content={<CustomBarTooltip />} />
-                    <Legend />
-                    <Bar dataKey="requests" name="Requests" fill="#8884d8" />
-                    <Bar dataKey="connections" name="Connections" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={weeklyData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="day" />
+                  <YAxis />
+                  <Tooltip content={<CustomBarTooltip />} />
+                  <Legend />
+                  <Bar dataKey="requests" name="Requests" fill="#8884d8" />
+                  <Bar dataKey="connections" name="Connections" fill="#82ca9d" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Category Distribution</CardTitle>
-            <CardDescription>
-              Distribution of requests by category
-            </CardDescription>
+            <CardTitle>Request Categories</CardTitle>
+            <CardDescription>Distribution of requests by category</CardDescription>
           </CardHeader>
           <CardContent>
-            {categoryStats.length === 0 ? (
-              <p className="text-center text-muted-foreground py-10">No category data available</p>
-            ) : (
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      activeIndex={activePieIndex}
-                      activeShape={renderActiveShape}
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      onMouseEnter={(_, index) => setActivePieIndex(index)}
-                    >
-                      {pieData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    activeIndex={activePieIndex}
+                    activeShape={renderActiveShape}
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    onMouseEnter={(_, index) => setActivePieIndex(index)}
+                  >
+                    {pieData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Category Performance</CardTitle>
-            <CardDescription>
-              Success rates by request category
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {categoryStats.length === 0 ? (
-              <p className="text-center text-muted-foreground py-10">No category data available</p>
-            ) : (
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    layout="vertical"
-                    data={categoryStats}
-                    margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" domain={[0, 100]} />
-                    <YAxis dataKey="name" type="category" />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="successRate" name="Success Rate (%)" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Performers</CardTitle>
-            <CardDescription>
-              Members with the most successful connections
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {topPerformers.length === 0 ? (
-              <p className="text-center text-muted-foreground py-10">No performer data available</p>
-            ) : (
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={performerChartData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                    <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-                    <Tooltip />
-                    <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="connections" name="Connections" stroke="#8884d8" activeDot={{ r: 8 }} />
-                    <Line yAxisId="right" type="monotone" dataKey="rating" name="Rating" stroke="#82ca9d" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {/* More detailed charts */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Expert Performance</CardTitle>
+          <CardDescription>Top performing experts by number of successful connections</CardDescription>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <div className="h-[400px] min-w-[600px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={performerChartData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
+                <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
+                <Tooltip />
+                <Legend />
+                <Line yAxisId="left" type="monotone" dataKey="connections" name="Connections" stroke="#8884d8" activeDot={{ r: 8 }} />
+                <Line yAxisId="right" type="monotone" dataKey="rating" name="Rating" stroke="#82ca9d" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

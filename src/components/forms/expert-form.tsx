@@ -10,13 +10,26 @@ import {
   SelectValue,
 } from "../ui/select";
 
+interface ExpertFormData {
+  fullName: string;
+  companyName: string;
+  sector: string;
+  domain: string;
+  role: string;
+  phone: string;
+  email: string;
+  linkedin: string;
+  location: string;
+  availability: "Happy to help" | "Not available";
+}
+
 interface ExpertFormProps {
   onClose?: () => void;
 }
 
 export function ExpertForm({ onClose }: ExpertFormProps) {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ExpertFormData>({
     fullName: "",
     companyName: "",
     sector: "",
@@ -26,25 +39,70 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
     email: "",
     linkedin: "",
     location: "",
-    availability: ""
+    availability: "Happy to help"
   });
 
   const availabilityOptions = [
-    "1-2 hours per week",
-    "3-5 hours per week",
-    "5+ hours per week",
-    "As needed",
-    "Limited availability"
-  ];
+    "Happy to help",
+    "Not available"
+  ] as const;
+
+  const sectorOptions = [
+    "Technology",
+    "Healthcare & Life Sciences",
+    "Finance & Banking",
+    "Education & EdTech",
+    "Energy & Sustainability",
+    "Consulting & Professional Services",
+    "Corporate Leadership & Management",
+    "Artificial Intelligence & Machine Learning",
+    "Human Resources & Talent Management",
+    "Government & Public Policy",
+    "Retail & E-Commerce",
+    "Manufacturing & Industrial Automation",
+    "Logistics & Supply Chain",
+    "Real Estate & Property Management",
+    "Legal & Compliance",
+    "Media & Entertainment",
+    "Marketing & Advertising",
+    "Cybersecurity & Data Protection",
+    "Agriculture & FoodTech",
+    "Aerospace & Defense",
+    "Other"
+  ] as const;
+
+  const domainOptions = [
+    "Software Development & Engineering",
+    "Data Science & Analytics",
+    "Cloud Computing & DevOps",
+    "Cybersecurity & Information Security",
+    "Digital Transformation & IT Strategy",
+    "Financial Services & FinTech",
+    "Investment & Wealth Management",
+    "Healthcare Technology & Digital Health",
+    "Biotechnology & Genomics",
+    "Education Technology (EdTech)",
+    "AI & Machine Learning",
+    "Human-Computer Interaction & UI/UX",
+    "Corporate Strategy & Operations",
+    "Renewable Energy & Sustainable Technologies",
+    "E-Commerce & Online Marketplaces",
+    "Supply Chain Management & Logistics",
+    "Real Estate & Urban Planning",
+    "LegalTech & Regulatory Compliance",
+    "Media Production & Content Creation",
+    "Marketing Automation & Growth Hacking",
+    "Other"
+  ] as const;
 
   const validateForm = () => {
-    // Required fields
-    const requiredFields = ['fullName', 'email', 'phone', 'sector', 'role', 'availability'];
+    // All fields are required now
+    const requiredFields = Object.keys(formData);
     for (const field of requiredFields) {
       if (!formData[field]) {
         toast({
           title: "Validation Error",
-          description: `${field.charAt(0).toUpperCase() + field.slice(1)} is required`,
+          description: `${field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')} is required`,
           variant: "destructive"
         });
         return false;
@@ -73,11 +131,11 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
       return false;
     }
 
-    // LinkedIn URL validation (optional)
-    if (formData.linkedin && !formData.linkedin.includes('linkedin.com')) {
+    // LinkedIn URL validation
+    if (!formData.linkedin.includes('linkedin.com/')) {
       toast({
         title: "Validation Error",
-        description: "Please enter a valid LinkedIn URL",
+        description: "Please enter a valid LinkedIn profile URL",
         variant: "destructive"
       });
       return false;
@@ -95,12 +153,31 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
 
     setLoading(true);
     try {
+      const submissionData = {
+        ...formData,
+        submittedAt: new Date().toISOString(),
+        phone: formData.phone.replace(/\D/g, '').startsWith('+') 
+          ? formData.phone.replace(/\D/g, '') 
+          : `+${formData.phone.replace(/\D/g, '')}`,
+        linkedin: formData.linkedin.startsWith('http') 
+          ? formData.linkedin 
+          : `https://${formData.linkedin}`
+      };
+
       const response = await fetch('https://hook.eu1.make.com/ax2go8kwme53tt4mswjomc82sevbk48f', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          type: "expert_submission",
+          data: submissionData,
+          metadata: {
+            source: window.location.href,
+            userAgent: navigator.userAgent,
+            timestamp: submissionData.submittedAt
+          }
+        })
       });
 
       if (!response.ok) {
@@ -109,7 +186,7 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
 
       toast({
         title: "Success",
-        description: "Expert information submitted successfully",
+        description: "Thank you for joining our expert network! We'll be in touch soon.",
         variant: "success"
       });
 
@@ -136,9 +213,9 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Add New Expert</CardTitle>
+        <CardTitle>Join Our Expert Network</CardTitle>
         <CardDescription>
-          Fill in the expert's information to add them to the network
+          Share your expertise and help others succeed. All fields are required to ensure the best matching with requests.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -161,12 +238,13 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
 
             <div className="space-y-2">
               <label htmlFor="companyName" className="text-sm font-medium">
-                Company Name
+                Company Name *
               </label>
               <input
                 id="companyName"
                 name="companyName"
                 type="text"
+                required
                 className="w-full p-2 border rounded-md"
                 value={formData.companyName}
                 onChange={handleInputChange}
@@ -177,29 +255,42 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
               <label htmlFor="sector" className="text-sm font-medium">
                 Sector *
               </label>
-              <input
-                id="sector"
-                name="sector"
-                type="text"
-                required
-                className="w-full p-2 border rounded-md"
+              <Select
                 value={formData.sector}
-                onChange={handleInputChange}
-              />
+                onValueChange={(value) => setFormData(prev => ({ ...prev, sector: value }))}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select your sector" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sectorOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
               <label htmlFor="domain" className="text-sm font-medium">
-                Domain
+                Domain *
               </label>
-              <input
-                id="domain"
-                name="domain"
-                type="text"
-                className="w-full p-2 border rounded-md"
+              <Select
                 value={formData.domain}
-                onChange={handleInputChange}
-              />
+                onValueChange={(value) => setFormData(prev => ({ ...prev, domain: value }))}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select your domain" />
+                </SelectTrigger>
+                <SelectContent>
+                  {domainOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -249,27 +340,42 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="linkedin" className="text-sm font-medium">
-                LinkedIn URL
+              <label htmlFor="linkedin" className="text-sm font-medium flex items-center gap-2">
+                LinkedIn Profile *
+                <a 
+                  href="https://linkedin.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  <svg className="w-5 h-5 inline-block" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                </a>
               </label>
               <input
                 id="linkedin"
                 name="linkedin"
                 type="url"
+                required
+                placeholder="https://linkedin.com/in/your-profile"
                 className="w-full p-2 border rounded-md"
                 value={formData.linkedin}
                 onChange={handleInputChange}
               />
+              <p className="text-xs text-gray-500">Share your LinkedIn profile to enhance credibility and networking opportunities</p>
             </div>
 
             <div className="space-y-2">
               <label htmlFor="location" className="text-sm font-medium">
-                Location
+                Location *
               </label>
               <input
                 id="location"
                 name="location"
                 type="text"
+                required
+                placeholder="City, Country"
                 className="w-full p-2 border rounded-md"
                 value={formData.location}
                 onChange={handleInputChange}
@@ -282,7 +388,7 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
               </label>
               <Select
                 value={formData.availability}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, availability: value }))}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, availability: value as "Happy to help" | "Not available" }))}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select availability" />
@@ -314,7 +420,7 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
                   Submitting...
                 </span>
               ) : (
-                'Submit'
+                'Join Network'
               )}
             </Button>
           </div>

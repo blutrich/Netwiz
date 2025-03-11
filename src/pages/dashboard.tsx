@@ -4,6 +4,7 @@ import { useExperts, useRequests } from "../hooks/use-sheets-data";
 import { Button } from "../components/ui/button";
 import { Dialog, DialogContent } from "../components/ui/dialog";
 import { ExpertForm } from "../components/forms/expert-form";
+import { toast } from "../components/ui/use-toast";
 
 export function DashboardPage() {
   const { experts, loading: expertsLoading } = useExperts();
@@ -43,6 +44,16 @@ export function DashboardPage() {
       setCategories(categoriesArray.slice(0, 5)); // Top 5 categories
     }
   }, [requests]);
+
+  const handleShareForm = () => {
+    const shareUrl = `${window.location.origin}/join-as-expert`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      toast({
+        title: "Link Copied!",
+        description: "The expert form link has been copied to your clipboard",
+      });
+    });
+  };
 
   // Loading state
   if (expertsLoading || requestsLoading) {
@@ -155,7 +166,7 @@ export function DashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <Button 
               className="h-auto py-4 flex flex-col items-center justify-center" 
               variant="outline"
@@ -168,6 +179,19 @@ export function DashboardPage() {
                 <line x1="23" y1="8" x2="18" y2="13"></line>
               </svg>
               <span className="text-sm font-medium">Add Expert</span>
+            </Button>
+
+            <Button 
+              className="h-auto py-4 flex flex-col items-center justify-center" 
+              variant="outline"
+              onClick={handleShareForm}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-2">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                <polyline points="16 6 12 2 8 6"></polyline>
+                <line x1="12" y1="2" x2="12" y2="15"></line>
+              </svg>
+              <span className="text-sm font-medium">Share Form</span>
             </Button>
             
             <Button className="h-auto py-4 flex flex-col items-center justify-center" variant="outline">

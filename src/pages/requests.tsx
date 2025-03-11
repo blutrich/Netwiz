@@ -57,92 +57,106 @@ export function RequestsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Requests</h1>
-          <p className="text-muted-foreground">
-            Manage anonymous requests from your community
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Select
-            value={statusFilter}
-            onValueChange={(value) => setStatusFilter(value === 'all' ? undefined : value)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="expert_contacted">Expert Contacted</SelectItem>
-              <SelectItem value="matched">Matched</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="expert_declined">Expert Declined</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline">Export</Button>
-        </div>
-      </div>
+    <div className="space-y-6 p-2 sm:p-4 md:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold">Requests</h1>
+      <p className="text-muted-foreground">
+        View and manage requests from your community members.
+      </p>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="py-4">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-2xl font-bold">{stats?.total || 0}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="py-4">
-            <CardTitle className="text-sm font-medium">Contacted</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Active Requests</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.expertContacted}</div>
+            <div className="text-2xl font-bold">{(stats?.expertContacted || 0) + (stats?.matched || 0)}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="py-4">
-            <CardTitle className="text-sm font-medium">Matched</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.matched}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="py-4">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Completed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.completed}</div>
+            <div className="text-2xl font-bold">{stats?.completed || 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats ? Math.round((stats.completed / stats.total) * 100) || 0 : 0}%
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>All Requests</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
+          <CardTitle>Request Management</CardTitle>
+          <div className="flex flex-wrap gap-2">
+            <Select 
+              value={statusFilter || "all"} 
+              onValueChange={(value) => setStatusFilter(value === "all" ? undefined : value)}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="expert_contacted">Expert Contacted</SelectItem>
+                <SelectItem value="matched">Matched</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="expert_declined">Expert Declined</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={() => setStatusFilter(undefined)}>
+              Reset
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="py-8 text-center">Loading requests...</div>
+            <div className="text-center py-8">
+              <p>Loading requests...</p>
+            </div>
           ) : error ? (
-            <div className="py-8 text-center text-red-500">
-              Error loading requests: {error.message}
+            <div className="text-center py-8 text-red-500">
+              <p>Error loading requests: {error.message || String(error)}</p>
             </div>
           ) : requests.length === 0 ? (
-            <div className="py-8 text-center">No requests found</div>
+            <div className="text-center py-8">
+              <p>No requests found matching the current filter.</p>
+            </div>
           ) : (
-            <div className="space-y-4">
-              {requests.map((request) => (
-                <div key={request.requestId} className="border rounded-lg p-4 transition-all hover:shadow-md">
-                  <div className="flex justify-between">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">
-                          {request.requestId.substring(0, 8)}
-                        </span>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse min-w-[700px]">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2 font-medium">Date</th>
+                    <th className="text-left p-2 font-medium">Request</th>
+                    <th className="text-left p-2 font-medium hidden md:table-cell">Category</th>
+                    <th className="text-left p-2 font-medium">Status</th>
+                    <th className="text-left p-2 font-medium hidden sm:table-cell">Expert</th>
+                    <th className="text-left p-2 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {requests.map((request) => (
+                    <tr key={request.requestId} className="border-b">
+                      <td className="p-2">{formatDate(request.createdAt).toLocaleDateString()}</td>
+                      <td className="p-2">{request.requestMessage}</td>
+                      <td className="p-2 hidden md:table-cell">{request.sector}</td>
+                      <td className="p-2">
                         <span
                           className={`text-xs px-2 py-1 rounded-full ${
                             statusColors[request.status] || "bg-gray-100 text-gray-800"
@@ -150,42 +164,24 @@ export function RequestsPage() {
                         >
                           {request.status.replace(/_/g, ' ')}
                         </span>
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${
-                            sectorColors[request.sector as keyof typeof sectorColors] ||
-                            "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {request.sector}
-                        </span>
-                      </div>
-                      <p className="text-sm font-medium">{request.requestMessage}</p>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>From: {request.requesterPhone.replace('@c.us', '')}</span>
-                        <span>
-                          {formatDate(request.createdAt).toLocaleDateString()} at{" "}
-                          {formatDate(request.createdAt).toLocaleTimeString()}
-                        </span>
-                      </div>
-                      {request.helperName && (
-                        <div className="text-xs text-muted-foreground">
-                          Expert: <span className="font-medium">{request.helperName}</span>
+                      </td>
+                      <td className="p-2 hidden sm:table-cell">{request.helperName}</td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline">
+                            View Details
+                          </Button>
+                          {request.status === "expert_contacted" && (
+                            <Button size="sm" variant="default">
+                              Find More Experts
+                            </Button>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <Button size="sm" variant="outline">
-                        View Details
-                      </Button>
-                      {request.status === "expert_contacted" && (
-                        <Button size="sm" variant="default">
-                          Find More Experts
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </CardContent>

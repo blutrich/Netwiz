@@ -80,7 +80,7 @@ export function LoginPage() {
     <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-[#0A2647] text-white' : 'bg-white text-gray-900'}`}>
       {/* Header */}
       <header className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <FullLogo size={36} darkMode={darkMode} />
+        <FullLogo size={30} darkMode={darkMode} />
         <Button 
           variant="outline" 
           onClick={() => setDarkMode(!darkMode)}
@@ -91,49 +91,56 @@ export function LoginPage() {
       </header>
       
       {/* Login Form */}
-      <div className="flex-1 flex items-center justify-center px-4">
-        <Card className={`w-full max-w-md ${darkMode ? 'bg-[#051630] border-blue-900' : ''}`}>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">
-              Sign in to NetWizBot
-            </CardTitle>
-            <CardDescription className="text-center">
-              Enter your email and password to access your account
+      <div className="flex-1 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md mx-auto shadow-lg">
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
+            <CardDescription>
+              Access your NetWizBot dashboard
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="email">
-                  Email
+                <label htmlFor="email" className="text-sm font-medium block">
+                  Email Address
                 </label>
                 <input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
-                  className={`w-full p-2 rounded-md border ${darkMode ? 'bg-[#0A2647] border-blue-900' : 'border-gray-300'}`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 ${
+                    darkMode ? 'bg-[#173D6E] border-blue-700 focus:ring-blue-500' : 'border-gray-300 focus:ring-blue-500'
+                  }`}
+                  placeholder="Enter your email"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="password">
-                  Password
-                </label>
+                <div className="flex justify-between items-center">
+                  <label htmlFor="password" className="text-sm font-medium block">
+                    Password
+                  </label>
+                  <a href="#" className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                    Forgot password?
+                  </a>
+                </div>
                 <input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
-                  className={`w-full p-2 rounded-md border ${darkMode ? 'bg-[#0A2647] border-blue-900' : 'border-gray-300'}`}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 ${
+                    darkMode ? 'bg-[#173D6E] border-blue-700 focus:ring-blue-500' : 'border-gray-300 focus:ring-blue-500'
+                  }`}
+                  placeholder="Enter your password"
                   required
                 />
               </div>
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full"
                 disabled={loading}
               >
                 {loading ? (
@@ -142,34 +149,22 @@ export function LoginPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Signing in...
+                    Signing In...
                   </span>
-                ) : (
-                  "Sign in"
-                )}
+                ) : 'Sign In'}
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <div className="text-sm text-center">
-              <span className="text-muted-foreground">Don't have an account? </span>
-              <Link to="/" className="text-primary hover:underline">
-                Contact your administrator
-              </Link>
-            </div>
-            <Button variant="outline" asChild className="w-full">
-              <Link to="/">Back to Home</Link>
-            </Button>
+          <CardFooter className="text-center text-sm flex flex-col space-y-2">
+            <p className="text-muted-foreground">
+              By continuing, you agree to the NetWizBot Terms of Service and Privacy Policy.
+            </p>
+            <p className="text-muted-foreground text-xs">
+              NetWizBot © {new Date().getFullYear()} | All rights reserved.
+            </p>
           </CardFooter>
         </Card>
       </div>
-      
-      {/* Footer */}
-      <footer className={`py-6 ${darkMode ? 'bg-[#051630]' : 'bg-gray-100'}`}>
-        <div className="container mx-auto px-4 text-center">
-          <p>© 2025 NetWiz. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 } 
