@@ -164,37 +164,50 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
           : `https://${formData.linkedin}`
       };
 
-      const response = await fetch('https://hook.eu1.make.com/ax2go8kwme53tt4mswjomc82sevbk48f', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          type: "expert_submission",
-          data: submissionData,
-          metadata: {
-            source: window.location.href,
-            userAgent: navigator.userAgent,
-            timestamp: submissionData.submittedAt
+      const data = {
+        type: "expert_submission",
+        data: submissionData,
+        metadata: {
+          source: window.location.href,
+          userAgent: navigator.userAgent,
+          timestamp: submissionData.submittedAt
+        }
+      };
+
+      // Using XMLHttpRequest instead of fetch
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://hook.eu1.make.com/ax2go8kwme53tt4mswjomc82sevbk48f', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('Accept', 'application/json');
+      
+      xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          toast({
+            title: "Success",
+            description: "Thank you for joining our expert network! We'll be in touch soon.",
+            variant: "default"
+          });
+
+          if (onClose) {
+            onClose();
           }
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      toast({
-        title: "Success",
-        description: "Thank you for joining our expert network! We'll be in touch soon.",
-        variant: "default"
-      });
-
-      if (onClose) {
-        onClose();
-      }
+        } else {
+          throw new Error('Network response was not ok');
+        }
+        setLoading(false);
+      };
+      
+      xhr.onerror = function() {
+        console.error('Submission error:', xhr.statusText);
+        toast({
+          title: "Error",
+          description: "Failed to submit expert information. Please try again.",
+          variant: "destructive"
+        });
+        setLoading(false);
+      };
+      
+      xhr.send(JSON.stringify(data));
     } catch (error) {
       console.error('Submission error:', error);
       toast({
@@ -202,7 +215,6 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
         description: "Failed to submit expert information. Please try again.",
         variant: "destructive"
       });
-    } finally {
       setLoading(false);
     }
   };
