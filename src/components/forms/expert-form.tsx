@@ -178,18 +178,20 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(data)
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Network response was not ok');
+      const responseData = await response.json();
+
+      if (!response.ok || !responseData.success) {
+        throw new Error(responseData.message || 'Failed to submit form');
       }
 
       toast({
         title: "Success",
-        description: "Thank you for joining our expert network! We'll be in touch soon.",
+        description: responseData.message || "Thank you for joining our expert network! We'll be in touch soon.",
         variant: "default"
       });
 
@@ -200,7 +202,7 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
       console.error('Submission error:', error);
       toast({
         title: "Error",
-        description: "Failed to submit expert information. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to submit expert information. Please try again.",
         variant: "destructive"
       });
     } finally {
