@@ -18,8 +18,10 @@ exports.handler = async function(event, context) {
 
   try {
     const data = JSON.parse(event.body);
+    console.log('Received data:', data);
     
     // Forward the request to Make.com
+    console.log('Sending request to Make.com...');
     const response = await fetch('https://hook.eu1.make.com/ax2go8kwme53tt4mswjomc82sevbk48f', {
       method: 'POST',
       headers: {
@@ -29,13 +31,15 @@ exports.handler = async function(event, context) {
       body: JSON.stringify(data)
     });
 
+    console.log('Make.com response status:', response.status);
     const responseData = await response.text();
-    let parsedResponse;
+    console.log('Make.com response data:', responseData);
     
+    let parsedResponse;
     try {
-      parsedResponse = JSON.parse(responseData);
+      parsedResponse = responseData ? JSON.parse(responseData) : { success: response.ok };
     } catch (e) {
-      // If Make.com doesn't return JSON, create a default response
+      console.log('Failed to parse Make.com response as JSON:', e);
       parsedResponse = { 
         success: response.ok,
         message: responseData || 'Submission received'
@@ -43,16 +47,20 @@ exports.handler = async function(event, context) {
     }
 
     if (!response.ok) {
+      console.error('Make.com error response:', response.status, parsedResponse);
       throw new Error(parsedResponse.message || `Make.com responded with ${response.status}`);
     }
 
+    const successResponse = {
+      success: true,
+      message: 'Expert submission successful',
+      data: parsedResponse
+    };
+    
+    console.log('Sending success response:', successResponse);
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        message: 'Expert submission successful',
-        data: parsedResponse
-      }),
+      body: JSON.stringify(successResponse),
       headers: { 
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
@@ -60,13 +68,16 @@ exports.handler = async function(event, context) {
     };
   } catch (error) {
     console.error('Submission error:', error);
+    const errorResponse = { 
+      success: false,
+      message: 'Failed to submit expert information',
+      error: error.message || 'Unknown error'
+    };
+    
+    console.log('Sending error response:', errorResponse);
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
-        success: false,
-        message: 'Failed to submit expert information',
-        error: error.message
-      }),
+      body: JSON.stringify(errorResponse),
       headers: { 
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'

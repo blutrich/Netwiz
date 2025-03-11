@@ -183,10 +183,17 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
         body: JSON.stringify(data)
       });
 
-      const responseData = await response.json();
+      let responseData;
+      try {
+        const text = await response.text();
+        responseData = text ? JSON.parse(text) : { success: false, message: 'Empty response from server' };
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError);
+        throw new Error('Invalid response from server');
+      }
 
       if (!response.ok || !responseData.success) {
-        throw new Error(responseData.message || 'Failed to submit form');
+        throw new Error(responseData.message || responseData.error || 'Failed to submit form');
       }
 
       toast({
