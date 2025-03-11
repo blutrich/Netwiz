@@ -54,7 +54,7 @@ export function UsersPage() {
         toast({
           title: "Role Updated",
           description: `User role has been updated to ${newRole} in the application. Note: Manual update to Google Sheets may be required.`,
-          variant: "success"
+          variant: "default"
         });
       }
     } catch (error) {
@@ -84,7 +84,7 @@ export function UsersPage() {
         toast({
           title: "Status Updated",
           description: `User has been ${updatedUser.isActive ? 'activated' : 'deactivated'} in the application. Note: Manual update to Google Sheets may be required.`,
-          variant: "success"
+          variant: "default"
         });
       }
     } catch (error) {
@@ -129,7 +129,7 @@ export function UsersPage() {
       toast({
         title: "User Added",
         description: "New user has been added successfully to the application. Note: Manual update to Google Sheets may be required.",
-        variant: "success"
+        variant: "default"
       });
     } catch (error) {
       console.error("Error adding user:", error);

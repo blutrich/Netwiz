@@ -187,7 +187,7 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
       toast({
         title: "Success",
         description: "Thank you for joining our expert network! We'll be in touch soon.",
-        variant: "success"
+        variant: "default"
       });
 
       if (onClose) {

@@ -43,7 +43,7 @@ export function LoginPage() {
         toast({
           title: "Login Successful",
           description: `Welcome back, ${user.name}!`,
-          variant: "success"
+          variant: "default"
         });
         navigate("/dashboard");
       } else {
