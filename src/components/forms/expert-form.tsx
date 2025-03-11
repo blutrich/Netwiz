@@ -166,8 +166,10 @@ export function ExpertForm({ onClose }: ExpertFormProps) {
 
       const response = await fetch('https://hook.eu1.make.com/ax2go8kwme53tt4mswjomc82sevbk48f', {
         method: 'POST',
+        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
           type: "expert_submission",
