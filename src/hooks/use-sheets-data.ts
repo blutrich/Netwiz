@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getExperts, getRequests, Expert, Request } from '../lib/services/google-sheets';
 
 export interface UseExpertsOptions {
@@ -9,6 +9,11 @@ export function useExperts(options: UseExpertsOptions = {}) {
   const [experts, setExperts] = useState<Expert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [refreshCount, setRefreshCount] = useState(0);
+  
+  const refreshExperts = useCallback(() => {
+    setRefreshCount(prev => prev + 1);
+  }, []);
   
   useEffect(() => {
     async function fetchExperts() {
@@ -32,9 +37,9 @@ export function useExperts(options: UseExpertsOptions = {}) {
     }
     
     fetchExperts();
-  }, [options.filterBySector]);
+  }, [options.filterBySector, refreshCount]);
   
-  return { experts, loading, error };
+  return { experts, loading, error, refreshExperts };
 }
 
 export interface UseRequestsOptions {

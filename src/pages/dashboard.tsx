@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { useExperts, useRequests } from "../hooks/use-sheets-data";
 import { Button } from "../components/ui/button";
-import { Dialog, DialogContent } from "../components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
 import { ExpertForm } from "../components/forms/expert-form";
 import { toast } from "../components/ui/use-toast";
 
@@ -222,6 +222,12 @@ export function DashboardPage() {
       {/* Expert Form Dialog */}
       <Dialog open={showExpertForm} onOpenChange={setShowExpertForm}>
         <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Join Our Expert Network</DialogTitle>
+            <DialogDescription>
+              Fill out this form to become part of our expert community and help others with your expertise.
+            </DialogDescription>
+          </DialogHeader>
           <ExpertForm onClose={() => setShowExpertForm(false)} />
         </DialogContent>
       </Dialog>

@@ -21,6 +21,7 @@ export interface Expert {
   linkedin: string;
   location: string;
   availability: string;
+  enrichData?: string;
 }
 
 export interface Request {
@@ -147,7 +148,7 @@ export async function getExperts(): Promise<Expert[]> {
     const firstSheetName = sheetNames[0];
     console.log(`Using sheet name: ${firstSheetName}`);
     
-    const rows = await fetchSheetData(EXPERT_SHEET_ID, `${firstSheetName}!A2:K`);
+    const rows = await fetchSheetData(EXPERT_SHEET_ID, `${firstSheetName}!A2:L`);
     
     if (!rows || rows.length === 0) {
       console.warn('No data found in the sheet, using mock data');
@@ -167,6 +168,7 @@ export async function getExperts(): Promise<Expert[]> {
       linkedin: row[7] || '',
       location: row[8] || '',
       availability: row[9] || '',
+      enrichData: row[10] || '',
     }));
   } catch (error) {
     console.error('Error fetching experts, falling back to mock data:', error);
