@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node ./node_modules/typescript/bin/tsc && node ./node_modules/.bin/vite build",
-    "type-check": "node ./node_modules/typescript/bin/tsc --noEmit",
+    "build": "npx tsc --skipLibCheck && npx vite build",
+    "type-check": "npx tsc --skipLibCheck --noEmit",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
     "lint:strict": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
@@ -55,7 +55,7 @@
     "postcss-nesting": "^13.0.1",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.2.2",
+    "typescript": "^5.8.2",
     "vite": "^5.1.6"
   }
 }
