@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npx tsc && vite build",
-    "type-check": "npx tsc --noEmit",
+    "build": "node ./node_modules/typescript/bin/tsc && vite build",
+    "type-check": "node ./node_modules/typescript/bin/tsc --noEmit",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
     "lint:strict": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
@@ -14,7 +14,7 @@
     "clean": "rm -rf dist node_modules",
     "test": "echo \"No tests configured\"",
     "prepare-deploy": "npm run type-check && npm run lint && npm run build",
-    "netlify-deploy": "npm install typescript && npx tsc && vite build"
+    "netlify-deploy": "npm install typescript && node ./node_modules/typescript/bin/tsc && vite build"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.0.4",
@@ -37,6 +37,7 @@
     "react-router-dom": "^6.22.3",
     "recharts": "^2.15.1",
     "tailwind-merge": "^2.2.1",
+    "typescript": "^5.8.2",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
@@ -56,7 +57,6 @@
     "postcss-nesting": "^13.0.1",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.8.2",
     "vite": "^5.1.6"
   }
 }

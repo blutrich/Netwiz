@@ -32,7 +32,7 @@ NetWizBot is a web application that helps WhatsApp communities connect members a
    - Click "New site from Git"
    - Choose your Git provider and select this repository
    - Configure build settings:
-     - Build command: `npm install typescript && npm run build`
+     - Build command: `npm ci && npm run build`
      - Publish directory: `dist`
 3. Set up required environment variables:
    - VITE_EXPERT_SHEET_ID
