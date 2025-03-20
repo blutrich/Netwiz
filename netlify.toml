@@ -5,6 +5,10 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # Note: Add actual values for these environment variables in the Netlify dashboard
+  # VITE_EXPERT_SHEET_ID = ""
+  # VITE_REQUEST_SHEET_ID = ""
+  # VITE_GOOGLE_API_KEY = ""
 
 [context.production]
   command = "npm install typescript && npm run build"

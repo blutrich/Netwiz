@@ -22,6 +22,43 @@ NetWizBot is a web application that helps WhatsApp communities connect members a
 - **Authentication**: Custom authentication system
 - **Deployment**: Netlify or Vercel
 
+## Deploying to Netlify
+
+### Option 1: Deploy via Git
+
+1. Fork or clone this repository
+2. Connect your Git repository to Netlify:
+   - Log in to Netlify
+   - Click "New site from Git"
+   - Choose your Git provider and select this repository
+   - Configure build settings:
+     - Build command: `npm install typescript && npm run build`
+     - Publish directory: `dist`
+3. Set up required environment variables:
+   - VITE_EXPERT_SHEET_ID
+   - VITE_REQUEST_SHEET_ID
+   - VITE_GOOGLE_API_KEY
+4. Deploy the site
+
+### Option 2: Manual Deployment
+
+```bash
+# Install dependencies
+npm install
+
+# Build the project
+npm run netlify-deploy
+
+# Deploy using Netlify CLI
+npx netlify deploy --prod
+```
+
+### Deployment Troubleshooting
+
+- If you encounter TypeScript errors during build, make sure TypeScript is properly installed
+- For environment variable issues, verify they are correctly set in the Netlify dashboard
+- Check the browser console for any runtime errors related to API connections
+
 ## Getting Started
 
 ### Prerequisites

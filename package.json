@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist node_modules",
     "test": "echo \"No tests configured\"",
-    "prepare-deploy": "npm run type-check && npm run lint && npm run build"
+    "prepare-deploy": "npm run type-check && npm run lint && npm run build",
+    "netlify-deploy": "npm install typescript && npx tsc && vite build"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.0.4",
